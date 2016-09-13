@@ -1,3 +1,7 @@
+Cargo.lock
 target
 .idea
 *.iml
+bin
+*.d
+*.o
