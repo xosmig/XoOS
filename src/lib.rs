@@ -6,6 +6,8 @@ extern crate libc;
 
 use libc::{c_void, c_int, size_t};
 
+mod error_handling;
+
 static GDB_FLAG: bool = true;
 
 #[no_mangle]
@@ -15,14 +17,7 @@ pub extern fn main() {
     let x = ["Hello", "World", "!"];
     let y = x;
 
+    let test = (0..3).flat_map(|x| 0..x).zip(0..);
+
     loop {}
-}
-
-// Used for Rust’s unwinding on panic.
-#[lang = "eh_personality"] extern fn eh_personality() {}
-
-// The entry point on panic.
-#[lang = "panic_fmt"]
-extern fn panic_fmt() -> ! {
-    loop {} // FIXME
 }
