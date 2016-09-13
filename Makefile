@@ -4,7 +4,7 @@ LD ?= ld
 
 TARGET := x86_64-unknown-linux-gnu
 
-CARGO_FLAGS := --target=$(TARGET)
+CARGO_FLAGS := --target=$(TARGET) --no-default-features
 LD_FLAGS := --nmagic --gc-sections -nostdlib -z max-page-size=0x1000
 
 ASM_SRC := $(wildcard src/asm/*.S)

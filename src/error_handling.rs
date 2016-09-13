@@ -1,7 +1,7 @@
 
 // The entry point on panic.
 #[lang = "panic_fmt"]
-extern fn panic_fmt() -> ! {
+pub extern fn panic_fmt() -> ! {
     loop {} // FIXME
 }
 
@@ -9,7 +9,7 @@ mod unwinding_fix {
     // Unwinding is disabled in Cargo.toml, so this functions will never be called (probably).
 
     #[lang = "eh_personality"]
-    extern fn eh_personality() {
+    pub extern fn eh_personality() {
         loop {} // FIXME
     }
 

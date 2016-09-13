@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Andrey Tonkikh <xosmig@gmail.com>"]
 
 [dependencies]
-rlibc = "1.0.0"
+rlibc = "1.0.0" # memcpy, memset, etc. Required for libc.
 libc = { version = "0.2.16", default-features = false }
 
 [lib]
@@ -12,10 +12,8 @@ crate-type = ["staticlib"]
 
 # The development profile, used for `cargo build`.
 [profile.dev]
-# Disable unwinding for debug build.
-panic = "abort"
+panic = "abort" # Disable unwinding for debug build.
 
 # The release profile, used for `cargo build --release`.
 [profile.release]
-# Disable unwinding for release build.
-panic = "abort"
+panic = "abort" # Disable unwinding for release build.
