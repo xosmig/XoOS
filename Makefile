@@ -36,7 +36,7 @@ gdb:
 	gdb bin/debug/kernel -ex 'set architecture i386:x86-64' -ex 'target remote localhost:1234'
 
 qemu:
-	qemu-system-x86_64 -kernel bin/debug/kernel -serial stdio -s &
+	qemu-system-x86_64 -kernel bin/debug/kernel -serial stdio -s
 
 # ======= compilation: =======
 

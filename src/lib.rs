@@ -5,15 +5,19 @@
 extern crate rlibc;
 extern crate libc;
 
-use libc::{c_void, c_int, size_t};
-
 mod error_handling;
 mod ioport;
 mod vga;
+mod serial;
+mod utility;
 
+#[allow(unused)]
 #[no_mangle]
 pub extern fn main() {
-    vga::print(b"Hello World! I'm cat.");
+    vga::print(b"Hello, World!");
+
+    let mut cout = serial::Serial::get();
+    cout.write_string(b"Serial Hello World!");
 
     loop{}
 }
