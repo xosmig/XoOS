@@ -30,6 +30,7 @@ pub extern fn main() {
     serial::fmt::test();
 
     Serial::get().write_str(OK_MESSAGE);
+    Serial::get().write_str(b"\n\n");
     vga::print(OK_MESSAGE);
     loop{}
 }

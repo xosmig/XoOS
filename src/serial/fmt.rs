@@ -4,6 +4,8 @@
 //use super::Serial;
 #[allow(unused)]
 use super::super::core::fmt::{self, Write};
+#[allow(unused)]
+use super::super::serial::Serial;
 
 struct Wrapper<'a> {
     buf: &'a mut [u8],
@@ -36,6 +38,16 @@ impl<'a> fmt::Write for Wrapper<'a> {
     }
 }
 
+struct Output;
+
+impl fmt::Display for Output {
+    fn fmt(&self, _: &mut fmt::Formatter) -> fmt::Result {
+        // this is place is never reached
+        Serial::get().write_str(b"There is a panic here:\n");
+        panic!();
+    }
+}
+
 pub fn test() {
     let x = 123;
     let mut buf = [b'0'; 20];
@@ -44,9 +56,16 @@ pub fn test() {
     {
         let mut wrapper = Wrapper::new(&mut buf);
         // it's just do nothing!
-        fmt::write(&mut wrapper, format_args!("{}", x)).expect("Can't write");
+        fmt::write(
+            &mut wrapper,
+            format_args!("{} should be panic: {}", x, Output)
+        ).expect("Can't write");
     }
 
     // assert_eq!(&buf[..3], &b"123"[..]); // it's a dream
     assert_eq!(&buf[..3], &b"000"[..]); // it's a reality
+
+    if buf[0] == b'0' {
+        Serial::get().write_str(b"\n[T_T]\n\n");
+    }
 }
