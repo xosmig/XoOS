@@ -11,22 +11,28 @@ ASM_SRC := $(wildcard src/asm/*.S)
 ASM_OBJ := $(ASM_SRC:.S=.o)
 
 RUST_OBJ := target/$(TARGET)/debug/libxo_os.a
+RUST_OBJ_RELEASE := target/$(TARGET)/release/libxo_os.a
 
 OBJ := $(ASM_OBJ) $(RUST_OBJ)
+OBJ_RELEASE := $(ASM_OBJ) $(RUST_OBJ_RELEASE)
 
 RES_DIR := bin/debug
 RES := $(RES_DIR)/kernel
 
-.PHONY: clean default build rust_build run gdb qemu
+RES_DIR_RELEASE := bin/release
+RES_RELEASE := $(RES_DIR_RELEASE)/kernel
+
+.PHONY: clean default build build_rust run gdb qemu release build_rust_release
 
 # ======= useful targets: =======
 
 default: build
 
+release: $(RES_RELEASE)
+
 build: $(RES)
 
-run: $(RES)
-	echo "FIXME: Not implemented yet"
+run: $(RES) qemu
 
 clean:
 	cargo clean
@@ -40,10 +46,17 @@ qemu:
 
 # ======= compilation: =======
 
-rust_build:
+build_rust_release:
+	cargo build $(CARGO_FLAGS) --release
+
+build_rust:
 	cargo build $(CARGO_FLAGS)
 
-$(RES): rust_build $(OBJ) kernel.ld
+$(RES_RELEASE): build_rust_release $(OBJ_RELEASE) kernel.ld
+	mkdir -p "$(RES_DIR_RELEASE)" 2> /dev/null
+	$(LD) $(LD_FLAGS) -T kernel.ld -o $@ $(OBJ_RELEASE)
+
+$(RES): build_rust $(OBJ) kernel.ld
 	mkdir -p "$(RES_DIR)" 2> /dev/null
 	$(LD) $(LD_FLAGS) -T kernel.ld -o $@ $(OBJ)
 

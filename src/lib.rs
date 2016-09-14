@@ -1,5 +1,6 @@
 #![feature(lang_items)]
 #![feature(asm)]
+#![feature(stmt_expr_attributes)]
 #![no_std]
 
 extern crate rlibc;
@@ -14,24 +15,21 @@ mod fmod;
 
 pub use fmod::*;
 
-use core::fmt;
 use serial::Serial;
 
 const OK_MESSAGE: &'static [u8] = b"[^_^]";
 
-#[allow(unused)]
 #[no_mangle]
 pub extern fn main() {
-    struct Test;
-    impl fmt::Display for Test {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            panic!();
-        }
+    #[cfg(gdb)]
+    {
+        static GDB_WAIT: bool = true;
+        while unsafe { core::ptr::read_volatile(&GDB_WAIT) } {  }
     }
-    format_args!("{}", Test {});
+
+    serial::fmt::test();
 
     Serial::get().write_str(OK_MESSAGE);
     vga::print(OK_MESSAGE);
-
     loop{}
 }

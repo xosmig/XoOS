@@ -1,6 +1,4 @@
 
-const COLOR_BYTE: u8 = 0b0_001_1111; // white foreground, blue background
-
 use super::core::ptr;
 
 const VGA_MEM: u64 = 0xb8000;
@@ -12,6 +10,8 @@ pub fn clear() {
 }
 
 pub fn print(str: &[u8]) {
+    const COLOR_BYTE: u8 = 0b0_001_1111; // white foreground, blue background
+
     let offset = 2004 - str.len() + if str.len() % 2 == 1 {1} else {0}; // it must be even
     let vga_mem = 0xb8000 + offset;
 
