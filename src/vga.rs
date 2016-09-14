@@ -1,19 +1,25 @@
 
-const COLOR_BYTE: u8 = 0x1f; // white foreground, blue background
-const MAX_LENGTH: usize = 32;
+const COLOR_BYTE: u8 = 0b0_001_1111; // white foreground, blue background
+
+use super::core::ptr;
+
+const VGA_MEM: u64 = 0xb8000;
+
+pub fn clear() {
+    for ptr in (VGA_MEM + 1000)..(VGA_MEM + 3000) {
+        unsafe { ptr::write(ptr as *mut _, 0 as u16) };
+    }
+}
 
 pub fn print(str: &[u8]) {
-
-    assert!(str.len() < MAX_LENGTH);
-
-    let mut colored = [0; 2 * MAX_LENGTH];
-    for (i, char_byte) in str.into_iter().enumerate() {
-        colored[i * 2] = *char_byte;
-        colored[i * 2 + 1] = COLOR_BYTE;
-    }
-
-    // write colored text to the center of the VGA text buffer
     let offset = 2004 - str.len() + if str.len() % 2 == 1 {1} else {0}; // it must be even
-    let buffer_ptr = (0xb8000 + offset) as *mut _;
-    unsafe { *buffer_ptr = colored };
+    let vga_mem = 0xb8000 + offset;
+
+    clear();
+    for (i, char) in str.into_iter().enumerate() {
+        unsafe {
+            ptr::write((vga_mem + i * 2) as *mut _, *char);
+            ptr::write((vga_mem + i * 2 + 1) as *mut _, COLOR_BYTE);
+        }
+    }
 }

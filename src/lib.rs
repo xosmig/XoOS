@@ -10,14 +10,28 @@ mod ioport;
 mod vga;
 mod serial;
 mod utility;
+mod fmod;
+
+pub use fmod::*;
+
+use core::fmt;
+use serial::Serial;
+
+const OK_MESSAGE: &'static [u8] = b"[^_^]";
 
 #[allow(unused)]
 #[no_mangle]
 pub extern fn main() {
-    vga::print(b"Hello, World!");
+    struct Test;
+    impl fmt::Display for Test {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            panic!();
+        }
+    }
+    format_args!("{}", Test {});
 
-    let mut cout = serial::Serial::get();
-    cout.write_string(b"Serial Hello World!");
+    Serial::get().write_str(OK_MESSAGE);
+    vga::print(OK_MESSAGE);
 
     loop{}
 }

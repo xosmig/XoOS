@@ -37,7 +37,7 @@ impl Serial {
         }
     }
 
-    pub fn write_string(&mut self, data: &[u8]) {
+    pub fn write_str(&mut self, data: &[u8]) {
         for byte in data {
             self.write_byte(*byte);
         }
