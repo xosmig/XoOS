@@ -1,10 +1,13 @@
 
 use super::vga;
+use super::core::fmt;
 
 // The entry point on panic.
+#[allow(private_no_mangle_fns)]
 #[lang = "panic_fmt"]
-pub extern fn panic_fmt() -> ! {
-    vga::print(b"ERROR: panic_fmt was executed.");
+#[no_mangle]
+pub extern fn rust_begin_panic(_msg: fmt::Arguments, _file: &'static str, _line: u32) -> ! {
+    vga::print(b"ERROR: panic!");
     loop {}
 }
 

@@ -58,7 +58,7 @@ pub fn test() {
         // it's just do nothing!
         fmt::write(
             &mut wrapper,
-            format_args!("{} should be panic: {}", x, Output)
+            format_args!("{} should be panic: {}", x, Output {  })
         ).expect("Can't write");
     }
 
@@ -66,6 +66,6 @@ pub fn test() {
     assert_eq!(&buf[..3], &b"000"[..]); // it's a reality
 
     if buf[0] == b'0' {
-        Serial::get().write_str(b"\n[T_T]\n\n");
+        Serial::get().write_str(b"[T_T]\n");
     }
 }
