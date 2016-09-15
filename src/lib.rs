@@ -31,11 +31,12 @@ pub extern fn main() {
         while unsafe { core::ptr::read_volatile(&GDB_WAIT) } {  }
     }
 
-    let x = 12;
-    let msg1 = "Hello, World. This is "; // FIXME
+    let x = [12, 154, 0];
+    let msg1 = "This is "; // FIXME
     let msg2 = " in octal: ";
-    let msg3 = ".\n";
-    print!(msg1, x, msg2, octal(&x), msg3);
+    let msg3 = ". And in hex: ";
+    let msg4 = ".\n";
+    print!(msg1, x, msg2, octal(&x), msg3, hex(&x), msg4);
 
     Serial::get().write_str(OK_MESSAGE);
     Serial::get().write_str(b"\n");
