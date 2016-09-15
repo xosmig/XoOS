@@ -11,9 +11,7 @@ mod ioport;
 mod vga;
 #[macro_use] mod serial;
 mod utility;
-mod fmod;
-
-pub use fmod::*;
+#[macro_use] mod interrupts;
 
 use serial::Serial;
 
@@ -21,6 +19,8 @@ use serial::Serial;
 pub extern fn main() {
     gdb_start();
 
+    interrupts::lock_on_cpu();
+//    unsafe { interrupt!(105) };
 
     end();
 }
