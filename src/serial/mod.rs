@@ -1,5 +1,5 @@
 
-pub mod fmt;
+#[macro_use] pub mod fmt;
 
 use super::ioport;
 use super::utility::*;
