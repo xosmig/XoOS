@@ -1,7 +1,6 @@
 
 use super::super::super::Serial;
 use super::print::Print;
-use super::{BUF, BUF_SIZE};
 
 const DIGITS: [u8; 16] = [b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7',
                           b'8', b'9', b'a', b'b', b'c', b'd', b'e', b'f'];
@@ -26,13 +25,16 @@ pub fn hex<'a, T: PrintHex>(obj: &'a T) -> Hex<'a, T> {
 
 impl PrintHex for u64 {
     fn print_hex(&self) {
+        const BUF_SIZE: usize = 20;
+
         let mut len = 0;
         let mut x = *self;
+        let mut buf = [0; BUF_SIZE];
 
         loop {
             len += 1;
 
-            unsafe { BUF[BUF_SIZE - len] = DIGITS[(x & 0b1111) as usize] };
+            buf[BUF_SIZE - len] = DIGITS[(x & 0b1111) as usize];
             x >>= 4;
 
             if x == 0 {
@@ -40,7 +42,7 @@ impl PrintHex for u64 {
             }
         }
 
-        unsafe { Serial::get().write_str(&BUF[(BUF_SIZE - len)..]) };
+        Serial::get().write_str(&buf[(BUF_SIZE - len)..]);
     }
 }
 

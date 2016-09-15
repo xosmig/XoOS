@@ -16,27 +16,27 @@ mod fmod;
 pub use fmod::*;
 
 use serial::Serial;
-//#[macro_use]
-use serial::fmt::*;
 
-const OK_MESSAGE: &'static [u8] = b"[^_^]";
+#[no_mangle]
+pub extern fn main() {
+    gdb_start();
+
+
+    end();
+}
 
 #[cfg(gdb)]
 static GDB_WAIT: bool = true;
 
-#[no_mangle]
-pub extern fn main() {
+fn gdb_start() {
     #[cfg(gdb)]
     {
         while unsafe { core::ptr::read_volatile(&GDB_WAIT) } {  }
     }
+}
 
-    let x = [12, 154, 0];
-    let msg1 = "This is "; // FIXME
-    let msg2 = " in octal: ";
-    let msg3 = ". And in hex: ";
-    let msg4 = ".\n";
-    print!(msg1, x, msg2, octal(&x), msg3, hex(&x), msg4);
+fn end() {
+    const OK_MESSAGE: &'static [u8] = b"[^_^]";
 
     Serial::get().write_str(OK_MESSAGE);
     Serial::get().write_str(b"\n");

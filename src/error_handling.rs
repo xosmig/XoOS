@@ -2,7 +2,7 @@
 use super::vga;
 use super::core::fmt;
 
-// The entry point on panic.
+// FIXME: Should be the entry point on panic.
 #[allow(private_no_mangle_fns)]
 #[lang = "panic_fmt"]
 #[no_mangle]
