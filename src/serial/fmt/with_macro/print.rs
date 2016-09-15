@@ -51,7 +51,7 @@ impl<'a> Print for &'a [u8] {
     }
 }
 
-impl<'a> Print for &'a str {
+impl Print for str {
     fn print(&self) {
         Serial::get().write_str(self.as_bytes());
     }
