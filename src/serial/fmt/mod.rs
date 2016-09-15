@@ -1,4 +1,10 @@
 
+// FIXME: It all should be in another module (not connected with serial port)
+// FIXME: And must be able to write in different places (for example: in char buffer)
+// FIXME: i.e. implement trait similar to `core::fmt::Write`
+// FIXME: or fix &str arguments and use `core::fmt::Write`
+// FIXME: but don't delete this code!! It's really cool :)
+
 mod with_macro;
 
 pub use self::with_macro::*;
