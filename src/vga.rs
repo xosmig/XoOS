@@ -1,5 +1,5 @@
 
-use super::core::ptr;
+use ::core::ptr;
 
 const VGA_MEM: u64 = 0xb8000;
 
@@ -16,9 +16,9 @@ pub fn print(str: &[u8]) {
     let vga_mem = 0xb8000 + offset;
 
     clear();
-    for (i, char) in str.into_iter().enumerate() {
+    for (i, byte) in str.into_iter().enumerate() {
         unsafe {
-            ptr::write((vga_mem + i * 2) as *mut _, *char);
+            ptr::write((vga_mem + i * 2) as *mut _, *byte);
             ptr::write((vga_mem + i * 2 + 1) as *mut _, COLOR_BYTE);
         }
     }

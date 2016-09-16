@@ -1,9 +1,9 @@
 
 #[repr(C)]
 #[repr(packed)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct IdtItem {
-    data: [u32; 16]
+    data: [u32; 16],
 }
 
 impl IdtItem {

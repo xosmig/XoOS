@@ -1,11 +1,10 @@
-//! contains class Serial.
-//! singleton for writing symbols to serial port.
+//! contains class Serial - singleton for writing symbols to serial port.
+//! also contains the definition of `print!` and `println!`
 
-//#[macro_use] pub mod fmt;
-use super::fmt;
+use ::fmt;
 
-use super::ioport;
-use super::utility::*;
+use ::ioport;
+use ::utility::*;
 
 const PORT: u16 = 0x3f8;
 
@@ -55,22 +54,4 @@ impl fmt::Write for Serial {
         }
         Ok(())
     }
-}
-
-macro_rules! print {
-    ($fmt: expr) => (
-        write!(serial::Serial::get(), $fmt)
-    );
-    ($fmt: expr, $( $arg: expr ),* ) => (
-        write!(serial::Serial::get(), $fmt $( ,$arg )* )
-    );
-}
-
-macro_rules! println {
-    ($fmt: expr) => (
-        print!(concat!($fmt, "\n"))
-    );
-    ($fmt: expr, $( $arg: expr ),* ) => (
-        print!(concat!($fmt, "\n") $( ,$arg )* )
-    );
 }

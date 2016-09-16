@@ -1,6 +1,6 @@
 
-use super::vga;
-use super::core::fmt;
+use ::vga;
+use ::core::fmt;
 
 // FIXME: Should be the entry point on panic.
 #[allow(private_no_mangle_fns)]
@@ -14,7 +14,7 @@ pub extern fn rust_begin_panic(_msg: fmt::Arguments, _file: &'static str, _line:
 mod unwinding_fix {
     // Unwinding is disabled in Cargo.toml, so this functions will never be called (probably).
 
-    use super::super::vga;
+    use ::vga;
 
     #[lang = "eh_personality"]
     pub extern fn eh_personality() {
