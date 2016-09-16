@@ -1,5 +1,8 @@
+//! contains class Serial.
+//! singleton for writing symbols to serial port.
 
-#[macro_use] pub mod fmt;
+//#[macro_use] pub mod fmt;
+use super::fmt;
 
 use super::ioport;
 use super::utility::*;
@@ -8,11 +11,12 @@ const PORT: u16 = 0x3f8;
 
 pub struct Serial;
 
-static OBJECT: Serial = Serial {  };
-static mut INIT: bool = false;
+static mut OBJECT: Serial = Serial {  };
 
 impl Serial {
-    pub fn get() -> &'static Self {
+    pub fn get() -> &'static mut Self {
+        static mut INIT: bool = false;
+
         unsafe {
             if !INIT {
                 // Disable all interrupts
@@ -28,22 +32,45 @@ impl Serial {
                 INIT = true;
             }
         }
-        &OBJECT
-    }
 
-    pub fn write_byte(&self, byte: u8) {
+        unsafe { &mut OBJECT }
+    }
+}
+
+impl fmt::Write for Serial {
+    fn write_char(&mut self, c: char) -> fmt::Result {
         loop {
             let free = unsafe { ioport::read::<u8>(PORT + 5) & bit::<u8>(5) };
             if free != 0 {
-                unsafe { ioport::write(PORT + 0, byte) };
+                unsafe { ioport::write(PORT + 0, c as u8) };
                 break;
             }
         }
+        Ok(())
     }
 
-    pub fn write_str(&self, data: &[u8]) {
-        for byte in data {
-            self.write_byte(*byte);
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        for char in s.chars() {
+            self.write_char(char);
         }
+        Ok(())
     }
+}
+
+macro_rules! print {
+    ($fmt: expr) => (
+        write!(serial::Serial::get(), $fmt)
+    );
+    ($fmt: expr, $( $arg: expr ),* ) => (
+        write!(serial::Serial::get(), $fmt $( ,$arg )* )
+    );
+}
+
+macro_rules! println {
+    ($fmt: expr) => (
+        print!(concat!($fmt, "\n"))
+    );
+    ($fmt: expr, $( $arg: expr ),* ) => (
+        print!(concat!($fmt, "\n") $( ,$arg )* )
+    );
 }

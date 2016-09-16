@@ -6,14 +6,16 @@
 extern crate rlibc;
 extern crate libc;
 
+#[macro_use] mod fmt;
+#[macro_use] mod serial;
+#[macro_use] mod interrupts;
 mod error_handling;
 mod ioport;
 mod vga;
-#[macro_use] mod serial;
 mod utility;
-#[macro_use] mod interrupts;
 
 use serial::Serial;
+use fmt::Write;
 
 #[no_mangle]
 pub extern fn main() {
@@ -38,8 +40,8 @@ fn gdb_start() {
 fn end() {
     const OK_MESSAGE: &'static [u8] = b"[^_^]";
 
-    Serial::get().write_str(OK_MESSAGE);
-    Serial::get().write_str(b"\n");
+//    Serial::get().write_str(OK_MESSAGE);
+//    Serial::get().write_str(b"\n");
     vga::print(OK_MESSAGE);
     loop{}
 }
