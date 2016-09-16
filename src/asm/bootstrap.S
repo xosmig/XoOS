@@ -65,6 +65,7 @@ stack_top:
 	jmp fail
 
 1:
+    call set_up_SSE
 	call check_long_mode
 	call setup_mapping
 
@@ -104,6 +105,27 @@ stack_top:
 #define PTE_WRITE	(1 << 1)
 #define PTE_LARGE	(1 << 7)
 #define CR4_PAE		(1 << 5)
+
+set_up_SSE:
+    // check for SSE
+    movl $0x1, %eax
+    cpuid
+    test $1<<25, %edx
+    jz no_SSE
+
+    // enable SSE
+    movl %cr0, %eax
+    and $0xFFFB, %ax    // clear coprocessor emulation CR0.EM
+    or $0x2, %ax        // set coprocessor monitoring  CR0.MP
+    movl %eax, %cr0
+    movl %cr4, %eax
+    or $3<<9, %ax       // set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
+    movl %eax, %cr4
+
+    ret
+
+no_SSE:
+    jmp no_SSE // FIXME: I don't know what to do in this case
 
 setup_mapping:
 	pushl $setup_paging

@@ -1,9 +1,4 @@
-
 //! note that you have to add `use ::fmt::Write` to get macro works
-
-// FIXME: a really horrible bug!!
-// FIXME: can't format number system ("{:o}"/"{:x}")
-// FIXME: write!(anything, "{:o}", 123) leads to fail
 
 pub use ::core::fmt::*;
 
