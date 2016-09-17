@@ -1,9 +1,10 @@
+#![allow(private_no_mangle_fns)]
 
 use ::vga;
 use ::core::fmt;
 use ::fmt::Write;
 
-#[allow(private_no_mangle_fns)]
+/// The entry point on panic.
 #[lang = "panic_fmt"]
 #[no_mangle]
 pub extern fn rust_begin_panic(_msg: fmt::Arguments, _file: &'static str, _line: u32) -> ! {
@@ -24,7 +25,6 @@ mod unwinding_fix {
         loop {}
     }
 
-    #[allow(private_no_mangle_fns)]
     #[allow(non_snake_case)]
     #[no_mangle]
     pub extern "C" fn _Unwind_Resume() -> ! {
