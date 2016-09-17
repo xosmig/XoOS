@@ -1,0 +1,4 @@
+[package]
+name = "core"
+version = "2016.09.17"
+authors = ["Andrey Tonkikh <xosmig@gmail.com>"]

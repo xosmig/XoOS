@@ -1,13 +1,16 @@
 
 use ::vga;
 use ::core::fmt;
+use ::fmt::Write;
 
 // FIXME: Should be the entry point on panic.
 #[allow(private_no_mangle_fns)]
 #[lang = "panic_fmt"]
 #[no_mangle]
 pub extern fn rust_begin_panic(_msg: fmt::Arguments, _file: &'static str, _line: u32) -> ! {
-    vga::print(b"ERROR: panic!");
+    println!("!! PANIC: in FILE: `{}`, on LINE: `{}`", _file, _line);
+    println!("MESSAGE: `{}`", _msg);
+    vga::print(b"!!! PANIC !!!");
     loop {}
 }
 

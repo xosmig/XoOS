@@ -20,13 +20,18 @@ use fmt::Write;
 
 #[no_mangle]
 pub extern fn main() {
-//    gdb_start();
-
-
+    #[cfg(gdb)] gdb_start();
+    #[cfg(os_test)] test_all();
 
     end();
 }
 
+#[cfg(os_test)]
+fn test_all() {
+    fmt::tests::all();
+}
+
+#[cfg(gdb)]
 fn gdb_start() {
     {
         let mut gdb_wait = true;

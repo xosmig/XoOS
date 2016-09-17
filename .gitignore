@@ -6,3 +6,5 @@ bin
 *.d
 *.o
 qemu.log
+~tmp
+build

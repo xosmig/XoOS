@@ -30,8 +30,9 @@ impl<'a> Write for Buffer<'a> {
         let bytes = s.as_bytes();
 
         let tail = &mut self.data[self.length..];
-        let tail = &mut tail[..bytes.len()];
         if tail.len() >= bytes.len() {
+            self.length += bytes.len();
+            let tail = &mut tail[..bytes.len()];
             tail.copy_from_slice(bytes);
             Ok(())
         } else {
@@ -53,10 +54,10 @@ impl<'a> Write for Buffer<'a> {
 /// prints data to the serial port
 macro_rules! print {
     ($fmt: expr) => (
-        write!(serial::Serial::get(), $fmt).expect("`print!` or `println` failed")
+        write!(::serial::Serial::get(), $fmt).expect("`print!` or `println` failed")
     );
     ($fmt: expr, $( $arg: expr ),* ) => (
-        write!(serial::Serial::get(), $fmt $( ,$arg )* ).expect("`print!` or `println!` failed")
+        write!(::serial::Serial::get(), $fmt $( ,$arg )* ).expect("`print!` or `println!` failed")
     );
 }
 
@@ -72,11 +73,51 @@ macro_rules! println {
 
 /// gets a byte array for buffer as the first parameter
 /// and writes formatted data into it
-/// returns the number of written bytes
+/// returns pair: (???, the number of written bytes)
 macro_rules! format {
-    ($buf: expr, $fmt: expr, $( $arg: expr ),*) => ({
-        let mut buffer = ::fmt::Buffer::new(&mut $buf);
-        write!(buffer, $fmt $( ,$arg )*);
-        buffer.len()
+    ($data: expr, $fmt: expr) => ({
+        let mut buf = ::fmt::Buffer::new(&mut $data);
+        write!(buf, $fmt).expect("`format!` failed");
+        buf.len()
     });
+    ($data: expr, $fmt: expr, $( $arg: expr ),*) => ({
+        let mut buf = ::fmt::Buffer::new(&mut $data);
+        write!(buf, $fmt $( ,$arg )*).expect("`format!` failed");
+        buf.len()
+    });
+}
+
+#[cfg(os_test)]
+pub mod tests {
+    use super::*;
+
+    pub fn all() {
+        overflow();
+        numbers();
+    }
+
+    fn overflow() {
+        let mut data = [0; 10];
+        let mut buf = Buffer::new(&mut data);
+        assert_eq!(buf.len(), 0);
+        assert_eq!(buf.capacity(), 10);
+        write!(buf, "123{}", 4).unwrap();
+        assert_eq!(buf.len(), 4);
+        write!(buf, "{}", "5678").unwrap();
+        assert_eq!(buf.len(), 8);
+        let err = write!(buf, "{}", "9ab");
+        assert!(err.is_err());
+        assert_eq!(buf.len(), 8);
+    }
+
+    fn numbers() {
+        let mut data = [0; 32];
+        let mut x: i64 = 123456789;
+        format!(data, "{}", x);
+        assert!(data.starts_with(b"123456789"));
+        format!(data, "{:#o}", x);
+        assert!(data.starts_with(b"0o726746425"));
+        format!(data, "{:#X}", x);
+        assert!(data.starts_with(b"0x75BCD15"));
+    }
 }
