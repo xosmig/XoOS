@@ -2,6 +2,7 @@
 
 pub use ::core::fmt::*;
 
+/// stringstream on a custom buffer
 #[derive(Debug)]
 pub struct Buffer<'a> {
     data: &'a mut [u8],
@@ -64,7 +65,7 @@ macro_rules! print {
 /// prints data to the serial port
 macro_rules! println {
     ($fmt: expr) => (
-        print!(concat!($fmt, "\n")).expect
+        print!(concat!($fmt, "\n"))
     );
     ($fmt: expr, $( $arg: expr ),* ) => (
         print!(concat!($fmt, "\n") $( ,$arg )* )
@@ -92,8 +93,10 @@ pub mod tests {
     use super::*;
 
     pub fn all() {
+        println!("Fmt tests... running");
         overflow();
         numbers();
+        println!("Fmt tests... OK");
     }
 
     fn overflow() {

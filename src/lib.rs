@@ -9,8 +9,8 @@ extern crate rlibc;
 extern crate libc;
 
 #[macro_use] mod fmt;
-#[macro_use] mod serial;
 #[macro_use] mod interrupts;
+mod serial;
 mod error_handling;
 mod ioport;
 mod vga;
@@ -33,17 +33,14 @@ fn test_all() {
 
 #[cfg(gdb)]
 fn gdb_start() {
-    {
-        let mut gdb_wait = true;
-        while unsafe { core::ptr::read_volatile(&gdb_wait) } {  }
-    }
+    let mut gdb_wait = true;
+    while unsafe { core::ptr::read_volatile(&gdb_wait) } {  }
 }
 
 fn end() {
-    const OK_MESSAGE: &'static [u8] = b"[^_^]";
+    const OK_MESSAGE: &'static str = "[^_^]";
 
-//    Serial::get().write_str(OK_MESSAGE);
-//    Serial::get().write_str(b"\n");
-    vga::print(OK_MESSAGE);
+    println!("{}", OK_MESSAGE);
+    vga::print(OK_MESSAGE.as_bytes());
     loop{}
 }

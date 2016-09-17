@@ -1,15 +1,26 @@
+# # environment variables:
+#   * CFG='opt1 opt2'
+#       available options: gdb, test
+#   * RUSTFLAGS
+#
+# # usefull targets:
+#   * build
+#   * run
+#   * gdb
 
 CC ?= gcc
 LD ?= ld
 
 TARGET := x86_64-unknown-linux-gnu
 
-RUSTFLAGS := -C target-feature=-mmx,-3dnow,-3dnowa,-avx,-avx2 -C no-vectorize-slp -C no-vectorize-loops
+#RUSTFLAGS := -C target-feature=-mmx,-3dnow,-3dnowa,-avx,-avx2 -C no-vectorize-slp -C no-vectorize-loops
+RUSTFLAGS :=$(RUSTFLAGS) $(patsubst %,--cfg %,$(CFG))
+
 CARGO_FLAGS := --target=$(TARGET) --no-default-features -v
 LD_FLAGS := --nmagic -nostdlib -z max-page-size=0x1000 --gc-sections
 QEMU_FLAGS := -d int -no-reboot -serial stdio -s 2> qemu.log
 
-CARGO := RUSTFLAGS='$(RUSTFLAGS) $(CFG)' cargo
+CARGO := RUSTFLAGS='$(RUSTFLAGS)' cargo
 
 ASM_SRC := $(wildcard src/asm/*.S)
 ASM_OBJ := $(ASM_SRC:.S=.o)
@@ -26,7 +37,7 @@ RES := $(RES_DIR)/kernel
 RES_DIR_RELEASE := bin/release
 RES_RELEASE := $(RES_DIR_RELEASE)/kernel
 
-.PHONY: clean default build build_rust run gdb qemu release build_rust_release
+.PHONY: clean default build build_rust run gdb qemu release build_rust_release tests
 
 # ======= useful targets: =======
 

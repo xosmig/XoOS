@@ -1,5 +1,5 @@
-
-// It is `read` and `write` because `in` is a rust keyword.
+/// wrapper for `in` and `out` asm commands.
+/// it is `read` and `write` because `in` is a rust keyword.
 
 pub trait IOPorts {
     unsafe fn write(port: u16, data: Self);
