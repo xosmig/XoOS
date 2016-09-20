@@ -25,11 +25,9 @@ impl IdtItem {
     }
 
     pub unsafe fn set_offset(&mut self, offset: *const ()) {
-        println!("{:?}", offset);
-        println!("{}", offset as usize);
-        //        self.offset1 = offset as u16;
-//        self.offset2 = (offset >> 16) as u16;
-//        self.offset3 = (offset >> 32) as u32;
+        self.offset1 = offset as u16;
+        self.offset2 = (offset >> 16) as u16;
+        self.offset3 = (offset >> 32) as u32;
     }
 }
 
@@ -73,6 +71,7 @@ pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u16) {
 
 #[no_mangle]
 pub unsafe fn mysetup() {
+    // FIXME
     let tmp = interrupt1 as *const ();
     assert!(tmp == 0 as *const ());
     assert!(interrupt1 as *const () != 0 as *const ());
