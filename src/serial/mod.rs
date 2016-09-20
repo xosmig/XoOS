@@ -50,7 +50,7 @@ impl fmt::Write for Serial {
 
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for char in s.chars() {
-            self.write_char(char);
+            try!(self.write_char(char));
         }
         Ok(())
     }

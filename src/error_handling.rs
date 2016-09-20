@@ -1,5 +1,3 @@
-#![allow(private_no_mangle_fns)]
-
 use ::vga;
 use ::core::fmt;
 use ::fmt::Write;
@@ -14,7 +12,7 @@ pub extern fn rust_begin_panic(_msg: fmt::Arguments, _file: &'static str, _line:
     loop {}
 }
 
-mod unwinding_fix {
+pub mod unwinding_fix {
     //! Unwinding is disabled in Cargo.toml, so this functions will never be called (probably).
 
     use ::vga;

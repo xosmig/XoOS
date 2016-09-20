@@ -7,9 +7,9 @@ pub fn unlock_on_cpu(){
     unsafe { asm!("sti" : /*out*/ : /*in*/ : /*clb*/ : "volatile" ) };
 }
 
-static mut MASK: u8 = 0;
+//static mut MASK: u8 = 0;
 
-pub fn lock(num: u8) {
+//pub fn lock(num: u8) {
 //     port;
 //    uint8_t value;
 //
@@ -21,16 +21,16 @@ pub fn lock(num: u8) {
 //    }
 //    value = inb(port) | (1 << IRQline);
 //    outb(port, value);
-}
+//}
 
-pub fn unlock(num: u8) {
-
-}
-
-pub fn lock_all() {
-
-}
-
-pub fn unlock_all() {
-
-}
+//pub fn unlock(num: u8) {
+//
+//}
+//
+//pub fn lock_all() {
+//
+//}
+//
+//pub fn unlock_all() {
+//
+//}

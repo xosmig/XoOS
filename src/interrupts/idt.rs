@@ -11,7 +11,7 @@ extern "C" {
 #[repr(C)]
 #[repr(packed)]
 #[derive(Clone, Copy, Debug)]
-struct IdtItem {
+pub struct IdtItem {
     offset1: u16,     // offset bits 0..15
     selector: u16,    // a code segment selector in GDT or LDT
     zero1: u8,        // bits 0..2 holds Interrupt Stack Table offset, rest of bits zero.
@@ -22,7 +22,7 @@ struct IdtItem {
 }
 
 impl IdtItem {
-    const fn new() -> Self {
+    pub const fn new() -> Self {
         IdtItem {
             offset1: 0,                 // offset bits 0..15
             selector: 0x08,             // a code segment selector in GDT or LDT
@@ -34,11 +34,11 @@ impl IdtItem {
         }
     }
 
-    fn get_offset(&self) -> usize {
+    pub fn get_offset(&self) -> usize {
         self.offset1 as usize | ((self.offset2 as usize) << 16) | ((self.offset3 as usize) << 32)
     }
 
-    unsafe fn set_offset(&mut self, offset: usize) {
+    pub unsafe fn set_offset(&mut self, offset: usize) {
         self.offset1 = offset as u16;
         self.offset2 = (offset >> 16) as u16;
         self.offset3 = (offset >> 32) as u32;
@@ -48,17 +48,17 @@ impl IdtItem {
 #[repr(C)]
 #[repr(packed)]
 #[derive(Clone, Copy, Debug)]
-struct IdtPtr {
+pub struct IdtPtr {
     limit: u16,
     base: *const IdtItem,
 }
 
 impl IdtPtr {
-    fn new(data: &[IdtItem]) -> Self {
+    pub fn new(data: &[IdtItem]) -> Self {
         IdtPtr { limit: (data.len() * size_of::<IdtItem>() - 1) as u16, base: data.as_ptr() }
     }
 
-    unsafe fn load(&self) {
+    pub unsafe fn load(&self) {
         asm!("lidt (%rdi)" : /*out*/ : "{rdi}"(self as *const IdtPtr) : /*clb*/ : "volatile");
     }
 }
@@ -67,6 +67,7 @@ const IDT_SIZE: usize = 64;
 
 static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
 
+#[allow(unused)] // FIXME
 #[no_mangle]
 pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u16) {
     vga::print(b"!! Interrupt !!");

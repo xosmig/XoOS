@@ -4,18 +4,20 @@
 #![feature(stmt_expr_attributes)]
 
 #![no_std]
-#![allow(unused)] // FIXME
 
 extern crate rlibc;
 extern crate libc;
 
-#[macro_use] mod fmt;
-#[macro_use] mod interrupts;
-mod serial;
-mod error_handling;
-mod ioport;
-mod vga;
-mod utility;
+#[macro_use]
+pub mod fmt;
+#[macro_use]
+pub mod interrupts;
+
+pub mod serial;
+pub mod error_handling;
+pub mod ioport;
+pub mod vga;
+pub mod utility;
 
 use fmt::Write;
 
@@ -50,7 +52,7 @@ fn end() {
     const OK_MESSAGE: &'static str = "[^_^]";
 
     // just sleep for some time
-    for i in 0..1_000_000 {
+    for _ in 0..1_000_000 {
         // do_nothing
     }
 
@@ -58,7 +60,3 @@ fn end() {
     vga::print(OK_MESSAGE.as_bytes());
     loop{}
 }
-
-// for visibility from asm.
-pub use ::interrupts::idt::handle_interrupt;
-
