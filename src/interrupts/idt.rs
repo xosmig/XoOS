@@ -2,14 +2,14 @@ use ::vga;
 use ::fmt::Write;
 use ::core::mem::size_of;
 
-extern {
+extern "C" {
     fn interrupt1();
 }
 
 #[repr(C)]
 #[repr(packed)]
 #[derive(Clone, Copy, Debug)]
-pub struct IdtItem {
+struct IdtItem {
     offset1: u16,     // offset bits 0..15
     selector: u16,    // a code segment selector in GDT or LDT
     zero1: u8,        // bits 0..2 holds Interrupt Stack Table offset, rest of bits zero.
@@ -20,11 +20,26 @@ pub struct IdtItem {
 }
 
 impl IdtItem {
-    pub fn get_offset(&self) -> u64 {
-        self.offset1 as u64 | ((self.offset2 as u64) << 16) as u64 | ((self.offset3 as u64) << 32)
+    const fn new() -> Self {
+        IdtItem {
+            offset1: 0,                 // offset bits 0..15
+            selector: 0x08,             // a code segment selector in GDT or LDT
+            zero1: 0,                   // something unused
+            type_attr: 0b1_000_1111,    // valid_unknown_type(trap gate)
+            offset2: 0,                 // offset bits 16..31
+            offset3: 0,                 // offset bits 32..63
+            zero2: 0,                   // reserved
+        }
     }
 
-    pub unsafe fn set_offset(&mut self, offset: *const ()) {
+    fn get_offset(&self) -> usize {
+        self.offset1 as usize | ((self.offset2 as usize) << 16) | ((self.offset3 as usize) << 32)
+    }
+
+    // FIXME: m.b. there is a normal function pointer type
+    unsafe fn set_offset(&mut self, ptr: *const ()) {
+        let offset = ptr as usize;
+
         self.offset1 = offset as u16;
         self.offset2 = (offset >> 16) as u16;
         self.offset3 = (offset >> 32) as u32;
@@ -34,7 +49,7 @@ impl IdtItem {
 #[repr(C)]
 #[repr(packed)]
 #[derive(Clone, Copy, Debug)]
-pub struct IdtPtr {
+struct IdtPtr {
     limit: u16,
     base: *const IdtItem,
 }
@@ -51,30 +66,33 @@ impl IdtPtr {
 
 const IDT_SIZE: usize = 64;
 
-static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem {
-    offset1: 0,                 // offset bits 0..15
-    selector: 0x08,             // a code segment selector in GDT or LDT
-    zero1: 0,                   // something unused
-    type_attr: 0b1_000_1111,    // valid_unknown_type(trap gate)
-    offset2: 0,                 // offset bits 16..31
-    offset3: 0,                 // offset bits 32..63
-    zero2: 0,                   // reserved
-}; IDT_SIZE];
+static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
 
 #[no_mangle]
-#[allow(private_no_mangle_fns)]
 pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u16) {
     vga::print(b"!! Interrupt !!");
     println!("!! Interrupt: {}", num);
-    loop {}
+        loop {}
 }
 
+#[allow(private_no_mangle_fns)]
 #[no_mangle]
 pub unsafe fn mysetup() {
-    // FIXME
+    // FIXME: one more strange bug
+
+//    interrupt1();
+    assert!(interrupt1 as *const () != 0 as *const ());
+
+
     let tmp = interrupt1 as *const ();
     assert!(tmp == 0 as *const ());
-    assert!(interrupt1 as *const () != 0 as *const ());
+
+    assert!(interrupt1 as usize == 0);
+
+    fn foo(ptr: *const ()) {
+        assert!(ptr == 0 as *const ());
+    }
+    foo(interrupt1 as *const ());
 
 //    IDT_TABLE[0].set_offset(interrupt1 as *const ());
 //    interrupt1();

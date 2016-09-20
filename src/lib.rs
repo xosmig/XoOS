@@ -1,5 +1,6 @@
 #![feature(lang_items)]
 #![feature(asm)]
+#![feature(const_fn)]
 #![feature(stmt_expr_attributes)]
 
 #![no_std]

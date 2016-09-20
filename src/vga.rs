@@ -1,7 +1,7 @@
 
 use ::core::ptr;
 
-const VGA_MEM: u64 = 0xb8000;
+const VGA_MEM: usize = 0xb8000;
 
 pub fn clear() {
     for ptr in (VGA_MEM + 1000)..(VGA_MEM + 3000) {

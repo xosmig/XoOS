@@ -256,6 +256,8 @@ start64:
 	jmp 1b
 
 interrupt1:
+    retq
+
 	pushq %rdi
 
 	movb $1, %dil
