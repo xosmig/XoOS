@@ -51,7 +51,7 @@ run: $(RES) qemu
 
 clean:
 	$(CARGO) clean
-	rm -rf bin src/asm/*.o src/asm/*.d ~tmp
+	rm -rf bin src/asm/*.o src/asm/*.d *.tmp *.log
 
 gdb:
 	gdb bin/debug/kernel -ex 'set architecture i386:x86-64' -ex 'target remote localhost:1234'

@@ -7,6 +7,8 @@ pub fn unlock_on_cpu(){
     unsafe { asm!("sti" : /*out*/ : /*in*/ : /*clb*/ : "volatile" ) };
 }
 
+static mut MASK: u8 = 0;
+
 pub fn lock(num: u8) {
 //     port;
 //    uint8_t value;

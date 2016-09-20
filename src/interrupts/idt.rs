@@ -2,7 +2,9 @@ use ::vga;
 use ::fmt::Write;
 use ::core::mem::size_of;
 
+// macros cannot expand to foreign items :(
 extern "C" {
+    fn interrupt0();
     fn interrupt1();
 }
 
@@ -36,10 +38,7 @@ impl IdtItem {
         self.offset1 as usize | ((self.offset2 as usize) << 16) | ((self.offset3 as usize) << 32)
     }
 
-    // FIXME: m.b. there is a normal function pointer type
-    unsafe fn set_offset(&mut self, ptr: *const ()) {
-        let offset = ptr as usize;
-
+    unsafe fn set_offset(&mut self, offset: usize) {
         self.offset1 = offset as u16;
         self.offset2 = (offset >> 16) as u16;
         self.offset3 = (offset >> 32) as u32;
@@ -72,35 +71,15 @@ static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
 pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u16) {
     vga::print(b"!! Interrupt !!");
     println!("!! Interrupt: {}", num);
-        loop {}
 }
 
-#[allow(private_no_mangle_fns)]
-#[no_mangle]
-pub unsafe fn mysetup() {
-    // FIXME: one more strange bug
-
-//    interrupt1();
-    assert!(interrupt1 as *const () != 0 as *const ());
-
-
-    let tmp = interrupt1 as *const ();
-    assert!(tmp == 0 as *const ());
-
-    assert!(interrupt1 as usize == 0);
-
-    fn foo(ptr: *const ()) {
-        assert!(ptr == 0 as *const ());
+pub unsafe fn setup() {
+    let diff = interrupt1 as usize - interrupt0 as usize;
+    for i in 0..IDT_SIZE {
+        IDT_TABLE[i].set_offset(interrupt0 as usize + diff * i);
     }
-    foo(interrupt1 as *const ());
-
-//    IDT_TABLE[0].set_offset(interrupt1 as *const ());
-//    interrupt1();
-//    for i in 0..IDT_SIZE {
-//        IDT_TABLE[i].set_offset(interrupt1 as *const ());
-//    }
-//    let ptr = IdtPtr::new(&IDT_TABLE);
-//    ptr.load()
+    let ptr = IdtPtr::new(&IDT_TABLE);
+    ptr.load()
 }
 
 pub mod tests {

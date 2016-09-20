@@ -25,9 +25,7 @@ pub unsafe extern fn main() {
     #[cfg(os_test)] test_all();
     ini();
 
-//    println!("{}", core::mem::size_of::<interrupts::idt::IdtItem>());
-//    asm!("INT 0xd" : /*out*/ : /*in*/ : /*clb*/ : "volatile", "intel");
-//    interrupts::unlock_on_cpu();
+    asm!("INT 63" : /*out*/ : /*in*/ : /*clb*/ : "volatile", "intel");
 
     end();
 }
@@ -44,11 +42,17 @@ fn gdb_start() {
 }
 
 unsafe fn ini() {
-    interrupts::idt::mysetup();
+    interrupts::idt::setup();
+    interrupts::unlock_on_cpu();
 }
 
 fn end() {
     const OK_MESSAGE: &'static str = "[^_^]";
+
+    // just sleep for some time
+    for i in 0..1_000_000 {
+        // do_nothing
+    }
 
     println!("{}", OK_MESSAGE);
     vga::print(OK_MESSAGE.as_bytes());
