@@ -8,7 +8,8 @@
 	.code32
 	.global start32
 	.extern main
-
+	.global interrupt1
+	.extern handle_interrupt
 
 	.align 16
 start32:
@@ -254,6 +255,14 @@ start64:
 	hlt
 	jmp 1b
 
+interrupt1:
+	pushq %rdi
+
+	movb $1, %dil
+	call handle_interrupt
+
+	popq %rdi
+	iretq
 
 	.bss
 	.align PAGE_SIZE

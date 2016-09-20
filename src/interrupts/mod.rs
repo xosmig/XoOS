@@ -1,5 +1,5 @@
 
-mod idt;
+pub mod idt;
 mod masking;
 
 // Num must be known at the compile time. Then we need a macro.
@@ -10,4 +10,3 @@ macro_rules! interrupt {
 }
 
 pub use self::masking::*;
-

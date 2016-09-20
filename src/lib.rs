@@ -19,9 +19,14 @@ mod utility;
 use fmt::Write;
 
 #[no_mangle]
-pub extern fn main() {
+pub unsafe extern fn main() {
     #[cfg(gdb)] gdb_start();
     #[cfg(os_test)] test_all();
+    ini();
+
+//    println!("{}", core::mem::size_of::<interrupts::idt::IdtItem>());
+//    asm!("INT 0xd" : /*out*/ : /*in*/ : /*clb*/ : "volatile", "intel");
+//    interrupts::unlock_on_cpu();
 
     end();
 }
@@ -37,6 +42,10 @@ fn gdb_start() {
     while unsafe { core::ptr::read_volatile(&gdb_wait) } {  }
 }
 
+unsafe fn ini() {
+    interrupts::idt::mysetup();
+}
+
 fn end() {
     const OK_MESSAGE: &'static str = "[^_^]";
 
@@ -44,3 +53,7 @@ fn end() {
     vga::print(OK_MESSAGE.as_bytes());
     loop{}
 }
+
+// for visibility from asm.
+pub use ::interrupts::idt::handle_interrupt;
+
