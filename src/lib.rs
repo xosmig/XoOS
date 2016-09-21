@@ -27,7 +27,7 @@ pub unsafe extern fn main() {
     #[cfg(os_test)] test_all();
     ini();
 
-    asm!("INT 63" : /*out*/ : /*in*/ : /*clb*/ : "volatile", "intel");
+    interrupt!(37);
 
     end();
 }
