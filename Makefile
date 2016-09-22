@@ -1,18 +1,5 @@
 # FIXME: make ./configure.sh to install all additional software
-#
-# WARNING: xargo must be installed
-# you can install it by running `cargo install xargo` in your console
-# if there are any problems, look at https://github.com/japaric/xargo#dependencies
-#
-# # environment variables:
-#   * CFG='opt1 opt2'
-#       available options: gdb, test
-#   * RUSTFLAGS
-#
-# # usefull targets:
-#   * build
-#   * run
-#   * gdb
+# FIXME: CFG=os_test recompiles libcore with --cfg os_test
 
 CC ?= gcc
 LD ?= ld

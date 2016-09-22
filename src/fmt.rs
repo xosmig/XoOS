@@ -93,10 +93,10 @@ pub mod tests {
     use super::*;
 
     pub fn all() {
-        println!("Fmt tests... running");
+        println!("fmt tests... running");
         overflow();
         numbers();
-        println!("Fmt tests... OK");
+        println!("fmt tests... OK");
     }
 
     fn overflow() {

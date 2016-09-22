@@ -79,12 +79,15 @@ impl<In> OutPort for IOPort<In, u32> {
     }
 }
 
-#[cfg(test)]
+#[cfg(os_test)]
 pub mod tests {
     use super::*;
+    use ::fmt::Write;
 
     pub fn all() {
-        make_instance
+        println!("ioports tests... running");
+        make_instance();
+        println!("ioports tests... OK");
     }
 
     fn make_instance() {

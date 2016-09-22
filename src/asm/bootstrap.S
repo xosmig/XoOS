@@ -8,7 +8,7 @@
 	.section .bootstrap, "ax"
 	.code32
 	.global start32
-	.extern main
+	.extern rust_start
 	.global interrupt0
 	.global interrupt1
 	.extern handle_interrupt
@@ -249,7 +249,7 @@ start64:
 	movq %rax, %rsp
 
 	cld
-	movabsq $main, %rax
+	movabsq $rust_start, %rax
 	call *%rax
 
 	cli

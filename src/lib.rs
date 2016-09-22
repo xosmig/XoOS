@@ -25,17 +25,20 @@ pub mod pit;
 use fmt::Write;
 
 #[no_mangle]
-pub unsafe extern fn main() {
+pub unsafe extern fn rust_start() {
     #[cfg(gdb)] gdb_start();
-    #[cfg(os_test)] test_all();
-    println!("Hello, World");
     ini();
 
-    pit::unlock_interrupt();
-    pit::start_periodical(0xFF_FF);
-    interrupt!(55);
+    #[cfg(os_test)] test_all();
+    #[cfg(not(os_test))] main();
 
     end();
+}
+
+fn main() {
+    pit::unlock_interrupt();
+    pit::start_periodical(0xFF_FF);
+    unsafe { interrupt!(55) };
 }
 
 #[cfg(os_test)]
