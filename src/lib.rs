@@ -6,7 +6,6 @@
 #![no_std]
 
 extern crate rlibc;
-extern crate libc;
 
 #[macro_use]
 pub mod fmt;

@@ -1,7 +1,7 @@
 // FIXME: TODO: use rust naked functions instead of pure asm. See: http://os.phil-opp.com/returning-from-exceptions.html
 
 // fix the difference between two handlers for easiest settings
-#define INTERRUPT_HANDLER_DIFF 64
+#define INTERRUPT_HANDLER_DIFF 128
 
 // scratch registers: rax, rcx, rdx, rsi, rdi, r8, r9, r10, r11
 
@@ -27,6 +27,14 @@
     popq %rcx; \
     popq %rax;
 
+// Unused now. I've disabled sse registers because it's to slow to save them on every interrupt
+#define SAVE_MULTIMEDIA_REGISTERS \
+    sub $512, %rsp; \
+    fxsave64 (%rsp);
+
+#define RESTORE_MULTIMEDIA_REGISTERS \
+    fxrstor64 (%rsp); \
+    add $512, %rsp;
 
 #define MAKE_INTERRUPT_HANDLER(num) \
 interrupt##num: \
@@ -42,7 +50,7 @@ interrupt##num: \
 #define MAKE_EXCEPTION_HANDLER(num) \
 interrupt##num: \
     PUSH_ENVIRONMENT; \
-    movq 0x70(%rsp), %rsi; \
+    movq 0x48(%rsp), %rsi; \
     movb $num, %dil; \
     cld; \
     callq handle_interrupt; \

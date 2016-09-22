@@ -1,3 +1,9 @@
+# FIXME: make ./configure.sh to install all additional software
+#
+# WARNING: xargo must be installed
+# you can install it by running `cargo install xargo` in your console
+# if there are any problems, look at https://github.com/japaric/xargo#dependencies
+#
 # # environment variables:
 #   * CFG='opt1 opt2'
 #       available options: gdb, test
@@ -11,7 +17,7 @@
 CC ?= gcc
 LD ?= ld
 
-TARGET := x86_64-unknown-linux-gnu
+TARGET := x86_64-unknown-none-gnu
 
 #RUSTFLAGS := -C target-feature=-mmx,-3dnow,-3dnowa,-avx,-avx2 -C no-vectorize-slp -C no-vectorize-loops
 RUSTFLAGS :=$(RUSTFLAGS) $(patsubst %,--cfg %,$(CFG))
@@ -20,7 +26,7 @@ CARGO_FLAGS := --target=$(TARGET) --no-default-features -v
 LD_FLAGS := --nmagic -nostdlib -z max-page-size=0x1000 --gc-sections
 QEMU_FLAGS := -d int -no-reboot -serial stdio -s 2> qemu.log
 
-CARGO := RUSTFLAGS='$(RUSTFLAGS)' cargo
+CARGO := RUSTFLAGS='$(RUSTFLAGS)' xargo
 
 ASM_SRC := $(wildcard src/asm/*.S)
 ASM_OBJ := $(ASM_SRC:.S=.o)

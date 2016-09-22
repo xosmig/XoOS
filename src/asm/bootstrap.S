@@ -68,7 +68,7 @@ stack_top:
 	jmp fail
 
 1:
-    call set_up_SSE
+    // call set_up_SSE // now sse disabled
 	call check_long_mode
 	call setup_mapping
 
