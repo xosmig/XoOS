@@ -69,12 +69,12 @@ static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
 
 #[allow(unused)] // FIXME
 #[no_mangle]
-pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u16) {
+pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u64) {
     vga::print(b"!! Interrupt !!");
-    println!("!! Interrupt: {}", num);
+    println!("!! Interrupt: {:#x}, Error code: {:#x}", num, error_code);
 }
 
-pub unsafe fn setup() {
+pub unsafe fn init_default() {
     let diff = interrupt1 as usize - interrupt0 as usize;
     for i in 0..IDT_SIZE {
         IDT_TABLE[i].set_offset(interrupt0 as usize + diff * i);

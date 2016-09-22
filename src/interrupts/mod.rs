@@ -9,10 +9,18 @@ macro_rules! interrupt {
     );
 }
 
+pub unsafe fn init_default() {
+    idt::init_default();
+    pic::init();
+    pic::lock_all();
+    unlock_on_cpu();
+}
+
 pub fn lock_on_cpu() {
     unsafe { asm!("cli" : /*out*/ : /*in*/ : /*clb*/ : "volatile" ) };
 }
 
-pub fn unlock_on_cpu(){
+pub fn unlock_on_cpu() {
     unsafe { asm!("sti" : /*out*/ : /*in*/ : /*clb*/ : "volatile" ) };
 }
+

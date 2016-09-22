@@ -1,6 +1,9 @@
 // fix the difference between two handlers for easiest settings
 #define INTERRUPT_HANDLER_DIFF 64
 
+//    RAX, RBX, RCX, RDX, RBP, RDI, RSI, R9 -
+//          R15
+
 #define PUSH_ENVIRONMENT \
     pushq %rax; \
     pushq %rbx; \
@@ -17,9 +20,6 @@
     pushq %r14; \
     pushq %r15;
 
-//    RAX, RBX, RCX, RDX, RBP, RDI, RSI, R9 -
-//          R15
-
 #define POP_ENVIRONMENT \
     popq %r15; \
     popq %r14; \
@@ -34,13 +34,28 @@
     popq %rdx; \
     popq %rcx; \
     popq %rbx; \
-    popq %rax; \
-    iretq;
+    popq %rax
+
 
 #define MAKE_INTERRUPT_HANDLER(num) \
 interrupt##num: \
     PUSH_ENVIRONMENT; \
-	movb $num, %dil; \
-	callq handle_interrupt; \
+    movq $0, %rsi; \
+    movb $num, %dil; \
+    cld; \
+    callq handle_interrupt; \
     POP_ENVIRONMENT; \
+    iretq; \
+    . = interrupt##num + INTERRUPT_HANDLER_DIFF
+
+#define MAKE_EXCEPTION_HANDLER(num) \
+interrupt##num: \
+    PUSH_ENVIRONMENT; \
+    movq 0x70(%rsp), %rsi; \
+    movb $num, %dil; \
+    cld; \
+    callq handle_interrupt; \
+    POP_ENVIRONMENT; \
+    add $0x8, %rsp; \
+    iretq; \
     . = interrupt##num + INTERRUPT_HANDLER_DIFF

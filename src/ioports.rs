@@ -1,6 +1,8 @@
 /// wrapper for `in` and `out` asm commands.
 /// it is `read` and `write` because `in` is a rust keyword.
 
+// FIXME: remake it! Create a `port` struct, which know what should be written and read.
+
 pub trait IOPorts {
     unsafe fn write(port: u16, data: Self);
     unsafe fn read(port: u16) -> Self;

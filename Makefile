@@ -75,5 +75,5 @@ $(RES): build_rust $(OBJ) kernel.ld
 	mkdir -p "$(RES_DIR)" 2> /dev/null
 	$(LD) $(LD_FLAGS) -T kernel.ld -o $@ $(OBJ)
 
-$(ASM_OBJ): %.o: %.S
+$(ASM_OBJ): %.o: %.S src/asm/interrupts.h
 	$(CC) -D__ASM_FILE__ -I./src/asm -g -MMD -c $< -o $@

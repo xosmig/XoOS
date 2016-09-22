@@ -15,7 +15,7 @@ pub mod interrupts;
 
 pub mod serial;
 pub mod error_handling;
-pub mod ioport;
+pub mod ioports;
 pub mod vga;
 pub mod utility;
 
@@ -25,9 +25,8 @@ use fmt::Write;
 pub unsafe extern fn main() {
     #[cfg(gdb)] gdb_start();
     #[cfg(os_test)] test_all();
+    println!("Hello, World");
     ini();
-
-    interrupt!(37);
 
     end();
 }
@@ -44,17 +43,11 @@ fn gdb_start() {
 }
 
 unsafe fn ini() {
-    interrupts::idt::setup();
-    interrupts::unlock_on_cpu();
+    interrupts::init_default();
 }
 
 fn end() {
     const OK_MESSAGE: &'static str = "[^_^]";
-
-    // just sleep for some time
-    for _ in 0..1_000_000 {
-        // do_nothing
-    }
 
     println!("{}", OK_MESSAGE);
     vga::print(OK_MESSAGE.as_bytes());
