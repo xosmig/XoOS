@@ -1,63 +1,55 @@
 
-// TODO: refactor it! Should be `struct Pic`
+struct Pic {
+    command: IOPort<u8, u8>,
+    data: IOPort<u8, u8>,
+}
 
 use ::ioports::*;
 
-static mut PIC1_COMMAND: IOPort<u8, u8> = IOPort::new(0x20);
-static mut PIC1_DATA: IOPort<u8, u8> = IOPort::new(0x21);
-const PIC1_IDT_START: u8 = 32;
+static mut PIC_1: Pic = Pic { command: IOPort::new(0x20), data: IOPort::new(0x21) };
+const PIC_1_IDT_START: u8 = 32;
 
-static mut PIC2_COMMAND: IOPort<u8, u8> = IOPort::new(0xA0);
-static mut PIC2_DATA: IOPort<u8, u8> = IOPort::new(0xA1);
-const PIC2_IDT_START: u8 = 40;
+static mut PIC_2: Pic = Pic { command: IOPort::new(0xA0), data: IOPort::new(0xA1) };
+const PIC_2_IDT_START: u8 = 40;
 
-pub unsafe fn init() {
+pub unsafe fn init_default() {
     // initialization command
-    PIC1_COMMAND.write(0x11);
-    PIC2_COMMAND.write(0x11);
+    PIC_1.command.write(0x11);
+    PIC_2.command.write(0x11);
 
-    PIC1_DATA.write(PIC1_IDT_START);
-    PIC2_DATA.write(PIC2_IDT_START);
+    PIC_1.data.write(PIC_1_IDT_START);
+    PIC_2.data.write(PIC_2_IDT_START);
 
     // the slave pic on the second place
-    PIC1_DATA.write(0b0000_0100);
-    PIC2_DATA.write(2);
+    PIC_1.data.write(0b0000_0100);
+    PIC_2.data.write(2);
 
     // just some not interesting parameters
-    PIC1_DATA.write(0x01);
-    PIC2_DATA.write(0x01);
+    PIC_1.data.write(0x01);
+    PIC_2.data.write(0x01);
 
     // clear interrupt masks
-    PIC1_DATA.write(0);
-    PIC2_DATA.write(0);
+    PIC_1.data.write(0);
+    PIC_2.data.write(0);
 }
 
-//pub fn lock(num: u8) {
-//    port;
-//    uint8_t value;
-//
-//    if(IRQline < 8) {
-//        port = PIC1_DATA;
-//    } else {
-//        port = PIC2_DATA;
-//        IRQline -= 8;
-//    }
-//    value = inb(port) | (1 << IRQline);
-//    outb(port, value);
+//pub fn lock(num: u8) { // TODO
 //}
 
-//pub fn unlock(num: u8) {
-//
+//pub fn unlock(num: u8) { // TODO
 //}
-//
+
 
 pub fn lock_all() {
     unsafe {
-        PIC1_DATA.write(0xFF);
-        PIC2_DATA.write(0xFF);
+        PIC_1.data.write(0xFF);
+        PIC_2.data.write(0xFF);
     }
 }
 
-//pub fn unlock_all() {
-//
-//}
+pub fn unlock_all() {
+    unsafe {
+        PIC_1.data.write(0x00);
+        PIC_2.data.write(0x00);
+    }
+}

@@ -11,7 +11,7 @@ macro_rules! interrupt {
 
 pub unsafe fn init_default() {
     idt::init_default();
-    pic::init();
+    pic::init_default();
     pic::lock_all();
     unlock_on_cpu();
 }
