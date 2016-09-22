@@ -1,5 +1,6 @@
 
 // FIXME: I think, this module should be refactored
+// FIXME: Master pic should know about slave or slave about master?
 
 pub struct Pic {
     command: IOPort<(), u8>,

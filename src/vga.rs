@@ -1,3 +1,4 @@
+//! The module for printing small messages on the screen.
 
 use ::core::ptr;
 

@@ -1,4 +1,5 @@
 // FIXME: rethink about publicity.
+// FIXME: comments.
 
 #![feature(lang_items)]
 #![feature(asm)]
@@ -31,7 +32,7 @@ pub unsafe extern fn main() {
     ini();
 
     pit::unlock_interrupt();
-    pit::run(0xFF_FF);
+    pit::start_periodical(0xFF_FF);
     interrupt!(55);
 
     end();

@@ -1,5 +1,4 @@
 //! contains class Serial - singleton for writing symbols to serial port.
-//! also contains the definition of `print!` and `println!`
 
 use ::fmt;
 use ::ioports::*;
