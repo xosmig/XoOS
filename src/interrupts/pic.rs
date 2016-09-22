@@ -1,4 +1,6 @@
 
+// FIXME: I think, this module should be refactored
+
 pub struct Pic {
     command: IOPort<(), u8>,
     data: IOPort<u8, u8>,

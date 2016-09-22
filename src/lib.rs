@@ -1,3 +1,5 @@
+// FIXME: rethink about publicity.
+
 #![feature(lang_items)]
 #![feature(asm)]
 #![feature(const_fn)]
