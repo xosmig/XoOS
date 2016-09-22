@@ -1,13 +1,3 @@
-use ::vga;
-use ::fmt::Write;
-use ::core::mem::size_of;
-
-// macros cannot expand to foreign items :(
-extern "C" {
-    fn interrupt0();
-    fn interrupt1();
-}
-
 #[repr(C)]
 #[repr(packed)]
 #[derive(Clone, Copy, Debug)]
@@ -43,46 +33,4 @@ impl IdtItem {
         self.offset2 = (offset >> 16) as u16;
         self.offset3 = (offset >> 32) as u32;
     }
-}
-
-#[repr(C)]
-#[repr(packed)]
-#[derive(Clone, Copy, Debug)]
-pub struct IdtPtr {
-    limit: u16,
-    base: *const IdtItem,
-}
-
-impl IdtPtr {
-    pub fn new(data: &[IdtItem]) -> Self {
-        IdtPtr { limit: (data.len() * size_of::<IdtItem>() - 1) as u16, base: data.as_ptr() }
-    }
-
-    pub unsafe fn load(&self) {
-        asm!("lidt (%rdi)" : /*out*/ : "{rdi}"(self as *const IdtPtr) : /*clb*/ : "volatile");
-    }
-}
-
-const IDT_SIZE: usize = 64;
-
-static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
-
-#[allow(unused)] // FIXME
-#[no_mangle]
-pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u64) {
-    vga::print(b"!! Interrupt !!");
-    println!("!! Interrupt: {:#x}, Error code: {:#x}", num, error_code);
-}
-
-pub unsafe fn init_default() {
-    let diff = interrupt1 as usize - interrupt0 as usize;
-    for i in 0..IDT_SIZE {
-        IDT_TABLE[i].set_offset(interrupt0 as usize + diff * i);
-    }
-    let ptr = IdtPtr::new(&IDT_TABLE);
-    ptr.load()
-}
-
-pub mod tests {
-    // TODO
 }

@@ -28,6 +28,8 @@ pub unsafe extern fn main() {
     println!("Hello, World");
     ini();
 
+    pit::unlock_interrupt();
+    pit::run(0xFF_FF);
     interrupt!(55);
 
     end();

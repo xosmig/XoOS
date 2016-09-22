@@ -2,10 +2,7 @@
 //! also contains the definition of `print!` and `println!`
 
 use ::fmt;
-
 use ::ioports::*;
-
-use ::utility::*;
 
 const PORT: u16 = 0x3f8;
 
@@ -48,7 +45,7 @@ impl Serial {
 impl fmt::Write for Serial {
     fn write_char(&mut self, c: char) -> fmt::Result {
         loop {
-            let free = unsafe { PORT_5.read() & bit::<u8>(5) };
+            let free = unsafe { PORT_5.read() & ::utility::bit(5) };
             if free != 0 {
                 unsafe { PORT_0.write(c as u8) };
                 break;

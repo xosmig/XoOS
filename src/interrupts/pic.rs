@@ -1,24 +1,42 @@
 
-struct Pic {
+pub struct Pic {
     command: IOPort<(), u8>,
     data: IOPort<u8, u8>,
+    idt_start: u8,
+}
+
+impl Pic {
+    pub unsafe fn end_of_interrupt(&mut self) {
+        // undirected
+        self.command.write(::utility::bit(5));
+    }
+
+    pub fn has_interrupt(&self, num: u8) -> bool {
+        num >= self.idt_start && num < self.idt_start + 8
+    }
 }
 
 use ::ioports::*;
 
-static mut PIC_1: Pic = Pic { command: IOPort::new(0x20), data: IOPort::new(0x21) };
-const PIC_1_IDT_START: u8 = 32;
+pub static mut PIC_1: Pic = Pic {
+    command: IOPort::new(0x20),
+    data: IOPort::new(0x21),
+    idt_start: 32,
+};
 
-static mut PIC_2: Pic = Pic { command: IOPort::new(0xA0), data: IOPort::new(0xA1) };
-const PIC_2_IDT_START: u8 = 40;
+pub static mut PIC_2: Pic = Pic {
+    command: IOPort::new(0xA0),
+    data: IOPort::new(0xA1),
+    idt_start: 40,
+};
 
 pub unsafe fn init_default() {
     // initialization command
     PIC_1.command.write(0x11);
     PIC_2.command.write(0x11);
 
-    PIC_1.data.write(PIC_1_IDT_START);
-    PIC_2.data.write(PIC_2_IDT_START);
+    PIC_1.data.write(PIC_1.idt_start);
+    PIC_2.data.write(PIC_2.idt_start);
 
     // the slave pic on the second place
     PIC_1.data.write(0b0000_0100);
@@ -36,9 +54,18 @@ pub unsafe fn init_default() {
 //pub fn lock(num: u8) { // TODO
 //}
 
-//pub fn unlock(num: u8) { // TODO
-//}
-
+pub fn unlock(mut num: u8) {
+    unsafe {
+        let pic = if num < 8 {
+            &mut PIC_1
+        } else {
+            num -= 8;
+            &mut PIC_2
+        };
+        let old_mask = pic.data.read();
+        pic.data.write(old_mask & !(1 << num));
+    }
+}
 
 pub fn lock_all() {
     unsafe {
