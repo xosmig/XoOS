@@ -1,8 +1,6 @@
 /// wrapper for `in` and `out` asm commands.
 /// it is `read` and `write` because `in` is a rust keyword.
 
-// FIXME: remake it! Create a `port` struct, which know what should be written and read.
-
 use ::core::marker::PhantomData;
 
 pub struct IOPort<In, Out> {
@@ -78,5 +76,31 @@ impl<In> OutPort for IOPort<In, u32> {
 
     unsafe fn write(&mut self, data: Self::Type) {
         asm!("outl %eax, %dx" :  : "{eax}"(data), "{dx}"(self.num) :  : "volatile");
+    }
+}
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    pub fn test_all() {
+        unsafe {
+            // Just make an instance. Don't use it;
+            let fls = false;
+            // volatile to disable optimization
+            if ::core::ptr::read_volatile(&fls) {
+                let mut port8 = IOPort::<u8, u8>::new(123);
+                port8.write(12);
+                port8.read();
+
+                let mut port16 = IOPort::<u16, u16>::new(123);
+                port16.write(12);
+                port16.read();
+
+                let mut port32 = IOPort::<u32, u32>::new(123);
+                port32.write(12);
+                port32.read();
+            }
+        }
     }
 }
