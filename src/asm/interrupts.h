@@ -1,4 +1,4 @@
-// FIXME: TODO: use rust naked functions instead of pure asm. See: http://os.phil-opp.com/returning-from-exceptions.html
+// FIXME: TODO: use rust naked functions instead of pure asm
 
 // fix the difference between two handlers for easiest settings
 #define INTERRUPT_HANDLER_DIFF 128
@@ -49,12 +49,13 @@ interrupt##num: \
 
 #define MAKE_EXCEPTION_HANDLER(num) \
 interrupt##num: \
+    sub $8, %rsp; /*align*/ \
     PUSH_ENVIRONMENT; \
-    movq 0x48(%rsp), %rsi; \
+    movq 10*8(%rsp), %rsi; /*nine registers + alignment*/ \
     movb $num, %dil; \
     cld; \
     callq handle_interrupt; \
     POP_ENVIRONMENT; \
-    add $0x8, %rsp; \
+    add $16, %rsp; /*pop error code and undo alignment*/ \
     iretq; \
     . = interrupt##num + INTERRUPT_HANDLER_DIFF
