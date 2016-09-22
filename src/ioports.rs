@@ -30,8 +30,8 @@ pub trait OutPort {
 impl<Out> InPort for IOPort<u8, Out> {
     type Type = u8;
 
-    unsafe fn read(&mut self) -> u8 {
-        let ret: u8;
+    unsafe fn read(&mut self) -> Self::Type {
+        let ret: Self::Type;
         asm!("inb %dx, %al" : "={al}"(ret) : "{dx}"(self.num) :  : "volatile");
         ret
     }
@@ -40,7 +40,43 @@ impl<Out> InPort for IOPort<u8, Out> {
 impl<In> OutPort for IOPort<In, u8> {
     type Type = u8;
 
-    unsafe fn write(&mut self, data: u8) {
+    unsafe fn write(&mut self, data: Self::Type) {
         asm!("outb %al, %dx" :  : "{al}"(data), "{dx}"(self.num) :  : "volatile");
+    }
+}
+
+impl<Out> InPort for IOPort<u16, Out> {
+    type Type = u16;
+
+    unsafe fn read(&mut self) -> Self::Type {
+        let ret: Self::Type;
+        asm!("inw %dx, %ax" : "={ax}"(ret) : "{dx}"(self.num) :  : "volatile");
+        ret
+    }
+}
+
+impl<In> OutPort for IOPort<In, u16> {
+    type Type = u16;
+
+    unsafe fn write(&mut self, data: Self::Type) {
+        asm!("outw %ax, %dx" :  : "{ax}"(data), "{dx}"(self.num) :  : "volatile");
+    }
+}
+
+impl<Out> InPort for IOPort<u32, Out> {
+    type Type = u32;
+
+    unsafe fn read(&mut self) -> Self::Type {
+        let ret: Self::Type;
+        asm!("inl %dx, %eax" : "={eax}"(ret) : "{dx}"(self.num) :  : "volatile");
+        ret
+    }
+}
+
+impl<In> OutPort for IOPort<In, u32> {
+    type Type = u32;
+
+    unsafe fn write(&mut self, data: Self::Type) {
+        asm!("outl %eax, %dx" :  : "{eax}"(data), "{dx}"(self.num) :  : "volatile");
     }
 }
