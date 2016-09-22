@@ -28,6 +28,8 @@ pub unsafe extern fn main() {
     println!("Hello, World");
     ini();
 
+    interrupt!(55);
+
     end();
 }
 
