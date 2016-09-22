@@ -1,35 +1,35 @@
 
+// TODO: refactor it! Should be `struct Pic`
+
 use ::ioports::*;
 
-const PIC1_COMMAND_PORT_OLD: u16 = 0x20;
-static mut PIC1_COMMAND_PORT: IOPort<u8, u8> = IOPort::new(0x20);
-const PIC1_DATA_PORT: u16 = 0x21;
+static mut PIC1_COMMAND: IOPort<u8, u8> = IOPort::new(0x20);
+static mut PIC1_DATA: IOPort<u8, u8> = IOPort::new(0x21);
 const PIC1_IDT_START: u8 = 32;
 
-const PIC2_COMMAND_PORT: u16 = 0xA0;
-const PIC2_DATA_PORT: u16 = 0xA1;
+static mut PIC2_COMMAND: IOPort<u8, u8> = IOPort::new(0xA0);
+static mut PIC2_DATA: IOPort<u8, u8> = IOPort::new(0xA1);
 const PIC2_IDT_START: u8 = 40;
 
 pub unsafe fn init() {
     // initialization command
-//    write::<u8>(PIC1_COMMAND_PORT_OLD, 0x11);
-    PIC1_COMMAND_PORT.write(0x11);
-    write::<u8>(PIC2_COMMAND_PORT, 0x11);
+    PIC1_COMMAND.write(0x11);
+    PIC2_COMMAND.write(0x11);
 
-    write::<u8>(PIC1_DATA_PORT, PIC1_IDT_START);
-    write::<u8>(PIC2_DATA_PORT, PIC2_IDT_START);
+    PIC1_DATA.write(PIC1_IDT_START);
+    PIC2_DATA.write(PIC2_IDT_START);
 
     // the slave pic on the second place
-    write::<u8>(PIC1_DATA_PORT, 0b0000_0100);
-    write::<u8>(PIC2_DATA_PORT, 2);
+    PIC1_DATA.write(0b0000_0100);
+    PIC2_DATA.write(2);
 
     // just some not interesting parameters
-    write::<u8>(PIC1_DATA_PORT, 0x01);
-    write::<u8>(PIC2_DATA_PORT, 0x01);
+    PIC1_DATA.write(0x01);
+    PIC2_DATA.write(0x01);
 
-    // set empty interrupt masks
-    write::<u8>(PIC1_DATA_PORT, 0);
-    write::<u8>(PIC2_DATA_PORT, 0);
+    // clear interrupt masks
+    PIC1_DATA.write(0);
+    PIC2_DATA.write(0);
 }
 
 //pub fn lock(num: u8) {
@@ -53,8 +53,8 @@ pub unsafe fn init() {
 
 pub fn lock_all() {
     unsafe {
-        write::<u8>(PIC1_DATA_PORT, 0xFF);
-        write::<u8>(PIC2_DATA_PORT, 0xFF);
+        PIC1_DATA.write(0xFF);
+        PIC2_DATA.write(0xFF);
     }
 }
 
