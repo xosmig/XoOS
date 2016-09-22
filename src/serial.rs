@@ -14,7 +14,7 @@ static mut PORT_1: IOPort<(), u8> = IOPort::new(PORT + 1);
 // static mut PORT_2: IOPort<(), u8> = IOPort::new(PORT + 2); // unused
 static mut PORT_3: IOPort<(), u8> = IOPort::new(PORT + 3);
 //static mut PORT_4: IOPort<(), u8> = IOPort::new(PORT + 4); // unused
-static mut PORT_5: IOPort<u8, u8> = IOPort::new(PORT + 5);
+static mut PORT_5: IOPort<u8, ()> = IOPort::new(PORT + 5);
 
 pub struct Serial;
 

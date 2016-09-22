@@ -1,6 +1,6 @@
 
 struct Pic {
-    command: IOPort<u8, u8>,
+    command: IOPort<(), u8>,
     data: IOPort<u8, u8>,
 }
 
