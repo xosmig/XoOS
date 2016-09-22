@@ -83,7 +83,12 @@ impl<In> OutPort for IOPort<In, u32> {
 pub mod tests {
     use super::*;
 
-    pub fn test_all() {
+    pub fn all() {
+        make_instance
+    }
+
+    fn make_instance() {
+        // it will test asm correctness
         unsafe {
             // Just make an instance. Don't use it;
             let fls = false;

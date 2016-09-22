@@ -17,6 +17,7 @@ pub mod error_handling;
 pub mod ioports;
 pub mod vga;
 pub mod utility;
+pub mod pit;
 
 use fmt::Write;
 
@@ -35,6 +36,7 @@ pub unsafe extern fn main() {
 #[cfg(os_test)]
 fn test_all() {
     fmt::tests::all();
+    ioports::tests::all();
 }
 
 #[cfg(gdb)]
