@@ -1,6 +1,3 @@
-// FIXME: rethink about publicity.
-// FIXME: comments.
-
 #![feature(lang_items)]
 #![feature(asm)]
 #![feature(const_fn)]
@@ -11,6 +8,8 @@
 extern crate rlibc;
 
 #[macro_use]
+pub mod utility;
+#[macro_use]
 pub mod fmt;
 #[macro_use]
 pub mod interrupts;
@@ -19,7 +18,6 @@ pub mod serial;
 pub mod error_handling;
 pub mod ioports;
 pub mod vga;
-pub mod utility;
 pub mod pit;
 
 use fmt::Write;

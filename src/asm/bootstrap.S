@@ -128,7 +128,7 @@ set_up_SSE:
     ret
 
 no_SSE:
-    jmp no_SSE // FIXME: I don't know what to do in this case
+	jmp fail
 
 setup_mapping:
 	pushl $setup_paging

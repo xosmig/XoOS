@@ -1,6 +1,3 @@
-# FIXME: make ./configure.sh to install all additional software
-# FIXME: CFG=os_test recompiles libcore with --cfg os_test
-
 CC ?= gcc
 LD ?= ld
 
