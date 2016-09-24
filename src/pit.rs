@@ -20,7 +20,7 @@ pub fn start_periodical(init: u16) {
 }
 
 pub fn unlock_interrupt() {
-    pic::unlock(0);
+    pic::unlock_interrupt(0);
 }
 
 //pub fn lock_interrupt() { // TODO

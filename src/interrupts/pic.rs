@@ -1,6 +1,4 @@
-
-// FIXME: I think, this module should be refactored
-// FIXME: Master pic should know about slave or slave about master?
+use ::ioports::*;
 
 pub struct Pic {
     command: IOPort<(), u8>,
@@ -18,8 +16,6 @@ impl Pic {
         num >= self.idt_start && num < self.idt_start + 8
     }
 }
-
-use ::ioports::*;
 
 pub static mut PIC_1: Pic = Pic {
     command: IOPort::new(0x20),
@@ -54,10 +50,20 @@ pub unsafe fn init_default() {
     PIC_2.data.write(0);
 }
 
-//pub fn lock(num: u8) { // TODO
-//}
+pub fn lock_interrupt(mut num: u8) {
+    unsafe {
+        let pic = if num < 8 {
+            &mut PIC_1
+        } else {
+            num -= 8;
+            &mut PIC_2
+        };
+        let old_mask = pic.data.read();
+        pic.data.write(old_mask | (1 << num));
+    }
+}
 
-pub fn unlock(mut num: u8) {
+pub fn unlock_interrupt(mut num: u8) {
     unsafe {
         let pic = if num < 8 {
             &mut PIC_1
