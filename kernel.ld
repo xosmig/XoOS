@@ -13,11 +13,11 @@ SECTIONS
 	.bootstrap : { *(.bootstrap) }
 
 	. += VIRTUAL_BASE;
-	.text : AT(ADDR(.bootstrap) + SIZEOF(.bootstrap)) { *(.text) }
+	.text : AT(ADDR(.bootstrap) + SIZEOF(.bootstrap)) { *(.text) *(.text.*) }
 
 	data_phys_begin = . - VIRTUAL_BASE;
-	.rodata : { *(.rodata) }
-	.data : { *(.data) }
+	.rodata : { *(.rodata) *(.rodata.*) }
+	.data : { *(.data) *(.data.*) *(.got) *(.got.*) }
 	data_phys_end = . - VIRTUAL_BASE;
 	. = ALIGN(PAGE_SIZE);
 
