@@ -5,9 +5,9 @@ use ::fmt::Write;
 /// The entry point on panic.
 #[lang = "panic_fmt"]
 #[no_mangle]
-pub extern fn rust_begin_panic(_msg: fmt::Arguments, _file: &'static str, _line: u32) -> ! {
-    println!("!! PANIC: in FILE: `{}`, on LINE: `{}`", _file, _line);
-    println!("MESSAGE: `{}`", _msg);
+pub extern fn rust_begin_panic(msg: fmt::Arguments, file: &'static str, line: u32) -> ! {
+    println!("!! PANIC: in FILE: `{}`, on LINE: `{}`", file, line);
+    println!("MESSAGE: `{}`", msg);
     vga::print(b"!!! PANIC !!!");
     loop {}
 }

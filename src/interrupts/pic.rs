@@ -1,4 +1,5 @@
 use ::ioports::*;
+use ::utility::bit;
 
 pub struct Pic {
     command: IOPort<(), u8>,
@@ -9,7 +10,7 @@ pub struct Pic {
 impl Pic {
     pub unsafe fn end_of_interrupt(&mut self) {
         // undirected
-        self.command.write(::utility::bit(5));
+        self.command.write(bit(5));
     }
 
     pub fn has_interrupt(&self, num: u8) -> bool {

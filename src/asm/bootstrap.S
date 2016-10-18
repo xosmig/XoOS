@@ -53,7 +53,7 @@ idt_ptr:
 	.quad 0
 
 	.align 16
-	.space 0x100
+	.space 4096
 stack_top:
 
 1:
@@ -69,8 +69,10 @@ stack_top:
 
 1:
     // call set_up_SSE // now sse disabled
+	pushl %ebx
 	call check_long_mode
 	call setup_mapping
+	popl %ebx
 
 #define EFER_MSR	0xC0000080
 #define EFER_LM		(1 << 8)
@@ -160,6 +162,7 @@ setup_mapping:
 	movl $(bootstrap_pml4 - VIRTUAL_BASE), %edi
 	movl $(bootstrap_pml3 - VIRTUAL_BASE + PTE_PRESENT + PTE_WRITE), %eax
 	movl %eax, (%edi)
+	movl %eax, 2048(%edi)
 	movl %eax, 4088(%edi)
 
 	movl %cr4, %eax
@@ -248,6 +251,8 @@ start64:
 	movabsq $bootstrap_stack_top, %rax
 	movq %rax, %rsp
 
+
+    movq %rbx, %rdi
 	cld
 	movabsq $rust_start, %rax
 	call *%rax

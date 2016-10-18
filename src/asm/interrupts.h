@@ -51,8 +51,9 @@ interrupt##num: \
 interrupt##num: \
     sub $8, %rsp; /*align*/ \
     PUSH_ENVIRONMENT; \
-    movq 10*8(%rsp), %rsi; /*nine registers + alignment*/ \
-    movb $num, %dil; \
+    /*Error code as the second parameter.*/ \
+    movq 10*8(%rsp), %rsi; /*10 = nine registers + alignment*/ \
+    movb $num, %dil; /*The interrupt number as the first parameter*/ \
     cld; \
     callq handle_interrupt; \
     POP_ENVIRONMENT; \
