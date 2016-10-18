@@ -26,13 +26,6 @@ pub mod memory_map;
 use fmt::Write;
 use boot_info::*;
 
-
-extern {
-    static text_phys_begin: ();
-    static bss_phys_end: ();
-}
-
-
 #[no_mangle]
 pub unsafe extern fn rust_start(info_ptr: usize) {
     #[cfg(gdb)] gdb_start();
@@ -46,10 +39,8 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
 
 
 fn main(info: &'static MultibootInfo) {
-    println!("{:?}", info.memory_map());
-    unsafe {
-        println!("[{:?}, {:?})", &text_phys_begin as *const (), &bss_phys_end as *const ());
-    }
+    let mem_map = info.memory_map();
+    println!("{:?}", mem_map);
 }
 
 

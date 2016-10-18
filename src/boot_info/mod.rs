@@ -1,10 +1,10 @@
 
 use ::utility::*;
-use ::memory_map::MemoryMap;
+use ::memory_map::{MemoryMap, MemoryMapPtr};
 
 #[repr(C)]
 #[repr(packed)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 pub struct MultibootInfo {
     // Multiboot info version number
     flags: u32,                 // 0
@@ -24,7 +24,7 @@ pub struct MultibootInfo {
     syms_3: u32,                // 36
     syms_4: u32,                // 40
     // Memory Map
-    mmap: MemoryMap,            // [44; 52)
+    mmap_ptr: MemoryMapPtr,     // [44; 52)
     // Drive Info buffer
     drives_length: u32,         // 52
     drives_addr: u32,           // 56
@@ -56,7 +56,7 @@ impl MultibootInfo {
         ret
     }
 
-    pub fn memory_map(&'static self) -> &'static MemoryMap {
-        &self.mmap
+    pub fn memory_map(&'static self) -> MemoryMap {
+        MemoryMap::load(&self.mmap_ptr)
     }
 }

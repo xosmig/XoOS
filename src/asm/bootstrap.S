@@ -53,7 +53,7 @@ idt_ptr:
 	.quad 0
 
 	.align 16
-	.space 4096
+	.space 0x100
 stack_top:
 
 1:
@@ -337,7 +337,7 @@ MAKE_INTERRUPT_HANDLER(63)
 
 	.bss
 	.align PAGE_SIZE
-	.space PAGE_SIZE
+	.space 2 * PAGE_SIZE
 bootstrap_stack_top:
 	.align PAGE_SIZE
 bootstrap_pml4:
