@@ -9,7 +9,7 @@ SECTIONS
 {
 	. = 1M + SIZEOF_HEADERS;
 
-	text_phys_begin = .;
+	TEXT_PHYS_BEGIN = .;
 	.bootstrap : { *(.bootstrap) }
 
 	. += VIRTUAL_BASE;
@@ -23,5 +23,5 @@ SECTIONS
 
 	bss_phys_begin = . - VIRTUAL_BASE;
 	.bss : { *(.bss) }
-	bss_phys_end = . - VIRTUAL_BASE;
+	BSS_PHYS_END = . - VIRTUAL_BASE;
 }

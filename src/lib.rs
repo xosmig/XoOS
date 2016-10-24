@@ -22,6 +22,7 @@ pub mod vga;
 pub mod pit;
 pub mod boot_info;
 pub mod memory_map;
+pub mod paging;
 
 use fmt::Write;
 use boot_info::*;
@@ -48,6 +49,7 @@ fn main(info: &'static MultibootInfo) {
 fn test_all() {
     fmt::tests::all();
     ioports::tests::all();
+    paging::tests::all();
 }
 
 
@@ -60,6 +62,7 @@ fn gdb_start() {
 
 unsafe fn ini() {
     interrupts::init_default();
+    paging::init_default();
 }
 
 

@@ -11,6 +11,8 @@
 	.extern rust_start
 	.global interrupt0
 	.global interrupt1
+	.global PML4
+	.global PML3
 	.extern handle_interrupt
 
 	.align 16
@@ -24,14 +26,14 @@ multiboot_header:
 	.long MB_HEADER_FLAGS
 	.long MB_HEADER_CKSUM
 	.long multiboot_header
-	.long text_phys_begin
+	.long TEXT_PHYS_BEGIN
 	.long data_phys_end
-	.long bss_phys_end
+	.long BSS_PHYS_END
 	.long start32
 
 
 	.align 16
-gdt:
+paging:
 	.quad 0x0000000000000000
 	.quad 0x00209b0000000000 // 64 bit ring0 code segment
 	.quad 0x0020930000000000 // 64 bit ring0 data segment
@@ -43,11 +45,11 @@ gdt:
 	.quad 0x00cf93000000ffff // 32 bit ring0 data segment
 	.quad 0x0000000000000000
 gdt_ptr:
-	.word (gdt_ptr - gdt - 1)
-	.long gdt
+	.word (gdt_ptr - paging - 1)
+	.long paging
 gdt_ptr64:
-	.word (gdt_ptr - gdt - 1)
-	.quad (gdt + VIRTUAL_BASE) 
+	.word (gdt_ptr - paging - 1)
+	.quad (paging + VIRTUAL_BASE)
 idt_ptr:
 	.word 0
 	.quad 0
@@ -137,7 +139,7 @@ setup_mapping:
 	call videomem_puts
 	addl $4, %esp
 
-	movl $(bootstrap_pml3 - VIRTUAL_BASE), %edi
+	movl $(PML3 - VIRTUAL_BASE), %edi
 	movl $(PTE_PRESENT | PTE_WRITE | PTE_LARGE), %eax
 	movl $0, %ebx
 	movl %eax, (%edi)
@@ -159,8 +161,8 @@ setup_mapping:
 	movl %eax, 24(%edi)
 	movl %ebx, 28(%edi)
 
-	movl $(bootstrap_pml4 - VIRTUAL_BASE), %edi
-	movl $(bootstrap_pml3 - VIRTUAL_BASE + PTE_PRESENT + PTE_WRITE), %eax
+	movl $(PML4 - VIRTUAL_BASE), %edi
+	movl $(PML3 - VIRTUAL_BASE + PTE_PRESENT + PTE_WRITE), %eax
 	movl %eax, (%edi)
 	movl %eax, 2048(%edi)
 	movl %eax, 4088(%edi)
@@ -169,7 +171,7 @@ setup_mapping:
 	orl $CR4_PAE, %eax
 	movl %eax, %cr4
 
-	movl $(bootstrap_pml4 - VIRTUAL_BASE), %eax
+	movl $(PML4 - VIRTUAL_BASE), %eax
 	movl %eax, %cr3
 	ret
 
@@ -337,10 +339,10 @@ MAKE_INTERRUPT_HANDLER(63)
 
 	.bss
 	.align PAGE_SIZE
-	.space 2 * PAGE_SIZE
+	.space 2 * PAGE_SIZE // I need a really big stack to put a memory map in
 bootstrap_stack_top:
 	.align PAGE_SIZE
-bootstrap_pml4:
+PML4:
 	.space PAGE_SIZE
-bootstrap_pml3:
+PML3:
 	.space PAGE_SIZE

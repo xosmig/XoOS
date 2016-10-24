@@ -3,8 +3,8 @@ use ::fmt::{self, Formatter, Debug};
 
 #[allow(improper_ctypes)]
 extern {
-    static text_phys_begin: ();
-    static bss_phys_end: ();
+    static TEXT_PHYS_BEGIN: ();
+    static BSS_PHYS_END: ();
 }
 
 /// Pointer to a memory map given from multiboot
@@ -37,8 +37,8 @@ pub struct MemoryMap {
 
 impl MemoryMap {
     pub fn load(ptr: &MemoryMapPtr) -> Self {
-        let kernel_start = unsafe { &text_phys_begin as *const () as *const u8 };
-        let kernel_end = unsafe { &bss_phys_end as *const () as *const u8 };
+        let kernel_start = unsafe { &TEXT_PHYS_BEGIN as *const () as *const u8 };
+        let kernel_end = unsafe { &BSS_PHYS_END as *const () as *const u8 };
 
         let mut ret = MemoryMap::default();
 
