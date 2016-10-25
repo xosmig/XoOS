@@ -22,10 +22,10 @@ pub struct Single {
 }
 
 impl Single {
-    pub unsafe fn new(begin: usize, end: usize) -> Option<&'static mut Self> {
-        let begin = round_up(begin, PADDING);
-        let end = round_down(end, PAGE_SIZE);
-        if begin + MIN_SIZE > end {
+    pub unsafe fn new(entry: &memory_map::Entry) -> Option<&'static mut Self> {
+        let end = round_down(entry.end() as usize, PAGE_SIZE);
+        let begin = round_up(entry.start() as usize, PADDING);
+        if !entry.is_available() || begin + MIN_SIZE > end {
             return None;  // too small memory region
         }
 

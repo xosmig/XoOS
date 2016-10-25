@@ -2,7 +2,7 @@
 pub mod paging;
 pub mod memory_map;
 
-mod buddy;
+pub mod buddy;
 
 pub use ::core::mem::*;
 

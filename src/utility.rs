@@ -1,6 +1,4 @@
 
-use ::core::convert::TryFrom;
-
 // unfortunately, there is no such a trait in the standard library
 // extern crates use `std`
 pub trait UInt: Copy {

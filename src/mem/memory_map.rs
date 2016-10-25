@@ -25,13 +25,12 @@ impl MemoryMapPtr {
     }
 }
 
-pub const MMAP_MAX_LEN: usize = 30;
+pub const MMAP_MAX_LEN: usize = 32;
 pub const ERROR_MSG: &'static str = "FAIL! Memory map is too big.";
 
 #[derive(Default)]
 pub struct MemoryMap {
-    // + 1 for kernel segment
-    entries: [Entry; MMAP_MAX_LEN + 1],
+    entries: [Entry; MMAP_MAX_LEN],
     len: usize,
 }
 
@@ -45,7 +44,8 @@ impl MemoryMap {
         // I can't use zip and have to use it to insert the kernel section to the memory map.
         let mut len = 0;
         for entry in ptr.iter() {
-            assert!(ret.len < MMAP_MAX_LEN, ERROR_MSG);
+            // - 2 because we need place to insert the kernel section
+            assert!(ret.len < MMAP_MAX_LEN - 2, ERROR_MSG);
 
             if entry.start() < kernel_start && entry.end() >= kernel_end {
                 // insert the kernel section
@@ -134,6 +134,10 @@ impl Entry {
 
     pub fn len(&self) -> usize {
         self.len as usize
+    }
+
+    pub fn is_available(&self) -> bool {
+        self.typ == EntryType::Available
     }
 
     unsafe fn get_next(&self) -> &'static Self {

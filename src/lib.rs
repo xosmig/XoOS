@@ -2,9 +2,7 @@
 #![feature(asm)]
 #![feature(const_fn)]
 #![feature(stmt_expr_attributes)]
-#![feature(try_from)]
 #![feature(shared)]
-#![feature(nonzero)]
 
 #![no_std]
 
@@ -26,23 +24,23 @@ pub mod boot_info;
 pub mod mem;
 
 use fmt::Write;
-use boot_info::*;
+use boot_info::MultibootInfo;
+use mem::memory_map::MemoryMap;
 
 #[no_mangle]
 pub unsafe extern fn rust_start(info_ptr: usize) {
     #[cfg(gdb)] gdb_start();
-    ini();
+    ini(info_ptr);
 
     #[cfg(os_test)] test_all();
-    #[cfg(not(os_test))] main(MultibootInfo::load(info_ptr));
+    #[cfg(not(os_test))] main();
 
     end();
 }
 
 
-fn main(info: &'static MultibootInfo) {
-    let mem_map = info.memory_map();
-    println!("{:?}", mem_map);
+fn main() {
+
 }
 
 
@@ -62,9 +60,13 @@ fn gdb_start() {
 }
 
 
-unsafe fn ini() {
+unsafe fn ini(info_ptr: usize) {
+    let info = MultibootInfo::load(info_ptr);
+    let mmap = info.memory_map();
+
     interrupts::init_default();
     mem::paging::init_default();
+    mem::buddy::init_default(&mmap);
 }
 
 
