@@ -2,8 +2,9 @@
 mod list;
 
 use ::core::ptr::{self, Shared};
-use ::mem::*;
 use ::mem::paging::PAGE_SIZE;
+use ::mem::*;
+use ::mem;
 use ::utility::*;
 use ::core::slice;
 
@@ -15,7 +16,7 @@ const PADDING: usize = 8;
 
 
 pub struct Single {
-    lists: [List; MAX_HEIGHT],
+    heads: [Node; MAX_HEIGHT],
     height: usize,
     nodes: &'static mut [Node],
     first_page: *mut u8,
@@ -36,35 +37,33 @@ impl Single {
         debug_assert!(height < MAX_HEIGHT);
         debug_assert!(cnt >= 3);
 
-        let first_node = (begin + size_of::<Single>()) as *mut _;
-        // initialize nodes
-        let icnt = cnt as isize;
-        for i in 0..icnt {
-            ptr::write(
-                first_node.offset(i),
-                Node {
-                    next: Shared::new(first_node.offset(if i == icnt - 1 {0} else {i + 1})),
-                    prev: Shared::new(first_node.offset(if i == 0 {icnt - 1} else {i - 1})),
-                    occupied: false,
-                }
-            );
-        }
-
-        let first_page = (end - PAGE_SIZE * cnt) as *mut _;
-        debug_assert!(first_node.offset(icnt) as usize <= first_page as usize);
+        let first_node = (begin + size_of::<Single>()) as *mut Node;
+        let first_page = (end - PAGE_SIZE * cnt) as *mut u8;
 
         ptr::write(
             begin as *mut _,
             Single {
-                lists: Default::default(),
+                heads: generate![Node::new(); MAX_HEIGHT],
                 height: height,
                 nodes: slice::from_raw_parts_mut(first_node, cnt),
                 first_page: first_page
             }
         );
+        let mut it = &mut*(begin as *mut Single);
+
+        // initialize nodes
+        for i in 0..(cnt as isize) {
+            ptr::write(first_node.offset(i), Node::new());
+            it.heads[0].insert(&mut*first_node.offset(i));
+        }
+
+        debug_assert!(first_node.offset(cnt as isize) as usize <= first_page as usize);
+
+
 
         // TODO: try_go_up many times for every Node
 
-        Some(&mut*(begin as *mut _))
+
+        Some(it)
     }
 }

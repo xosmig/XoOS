@@ -9,12 +9,13 @@
 extern crate rlibc;
 
 #[macro_use]
-pub mod utility;
+pub mod macro_utility;
 #[macro_use]
 pub mod fmt;
 #[macro_use]
 pub mod interrupts;
 
+pub mod utility;
 pub mod serial;
 pub mod error_handling;
 pub mod ioports;
