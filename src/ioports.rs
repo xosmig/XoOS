@@ -80,7 +80,7 @@ impl<In> OutPort for IOPort<In, u32> {
 }
 
 #[cfg(os_test)]
-pub mod tests {
+pub mod ioports_tests {
     use super::*;
     use ::fmt::Write;
 

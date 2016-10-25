@@ -26,7 +26,7 @@ impl MemoryMapPtr {
 }
 
 pub const MMAP_MAX_LEN: usize = 30;
-pub const ERROR_MSG: &'static str = "FAIL! Your memory map is too big.";
+pub const ERROR_MSG: &'static str = "FAIL! Memory map is too big.";
 
 #[derive(Default)]
 pub struct MemoryMap {

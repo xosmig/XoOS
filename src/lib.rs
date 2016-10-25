@@ -3,6 +3,8 @@
 #![feature(const_fn)]
 #![feature(stmt_expr_attributes)]
 #![feature(try_from)]
+#![feature(shared)]
+#![feature(nonzero)]
 
 #![no_std]
 
@@ -21,8 +23,7 @@ pub mod ioports;
 pub mod vga;
 pub mod pit;
 pub mod boot_info;
-pub mod memory_map;
-pub mod paging;
+pub mod mem;
 
 use fmt::Write;
 use boot_info::*;
@@ -48,8 +49,9 @@ fn main(info: &'static MultibootInfo) {
 #[cfg(os_test)]
 fn test_all() {
     fmt::tests::all();
-    ioports::tests::all();
-    paging::tests::all();
+    ioports::ioports_tests::all();
+    utility::utility_tests::all();
+    mem::paging::tests::all();
 }
 
 
@@ -62,7 +64,7 @@ fn gdb_start() {
 
 unsafe fn ini() {
     interrupts::init_default();
-    paging::init_default();
+    mem::paging::init_default();
 }
 
 

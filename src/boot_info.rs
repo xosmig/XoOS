@@ -1,6 +1,6 @@
 
 use ::utility::*;
-use ::memory_map::{MemoryMap, MemoryMapPtr};
+use ::mem::memory_map::{MemoryMap, MemoryMapPtr};
 
 #[repr(C)]
 #[repr(packed)]
