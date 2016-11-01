@@ -20,6 +20,7 @@ pub mod fmt;
 #[macro_use]
 pub mod interrupts;
 
+pub mod prelude;
 pub mod utility;
 pub mod serial;
 pub mod error_handling;
@@ -55,7 +56,7 @@ fn test_all() {
     ioports::ioports_tests::all();
     utility::utility_tests::all();
     mem::paging::tests::all();
-    mem::buddy::tests::all();
+    mem::buddy::buddy_tests::all();
 }
 
 

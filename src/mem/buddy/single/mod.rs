@@ -1,14 +1,12 @@
 
 mod list;
 
-use ::core::ptr::{self, Shared};
+use ::prelude::*;
 use ::mem::paging::PAGE_SIZE;
-use ::mem::*;
-use ::mem::{ self, get_mut_ptr };
+use ::mem::{ get_mut_ptr, memory_map };
 use ::utility::{ round_up, round_down, log2_floor };
 use ::core::slice;
 use ::core::cmp::{min, max};
-use ::core::nonzero::NonZero;
 
 use self::list::*;
 
@@ -37,8 +35,8 @@ impl Single {
         debug_assert!(height < MAX_HEIGHT);
         debug_assert!(cnt >= 3);
 
-        let first_node = get_mut_ptr::<Node>(begin + size_of::<Single>());
-        let first_page = get_mut_ptr::<u8>(end - PAGE_SIZE * cnt);
+        let first_node: *mut Node = get_mut_ptr(begin + size_of::<Single>());
+        let first_page: *mut u8 = get_mut_ptr(end - PAGE_SIZE * cnt);
         debug_assert!(first_node.offset(cnt as isize) as usize <= first_page as usize);
 
         ptr::write(
@@ -76,7 +74,7 @@ impl Single {
                 if self.nodes[num].is_free() {
                     self.down_to_level(num, req_level);
                     self.nodes[num].set_occupied();
-                    return Some(unsafe { NonZero::new(self.node_num_to_address(num)) });
+                    return Some(unsafe { NonZero::new(self.node_to_ptr(num)) });
                 }
             }
         }
@@ -84,10 +82,17 @@ impl Single {
         None  // not found :(
     }
 
+    pub unsafe fn deallocate(&mut self, ptr: NonZero<*mut u8>) {
+        let node = self.ptr_to_node(*ptr);
+        assert!(self.nodes[node].is_occupied(), "Invalid buddy deallocate call on {:?}", *ptr);
+        let buddy = self.nodes[node].get_buddy();
+        debug_assert!(self.nodes[buddy].level() <= self.nodes[node].level());
+    }
+
     fn go_up_once(&mut self, num: usize) -> bool {
         debug_assert!(self.nodes[num].is_free());
         let level = self.nodes[num].level();
-        let buddy = self.nodes[num].buddy_num();
+        let buddy = self.nodes[num].get_buddy();
 
         if buddy >= self.nodes.len() || !self.nodes[buddy].ready(&self.nodes[num]) {
             return false;
@@ -143,7 +148,14 @@ impl Single {
         }
     }
 
-    fn node_num_to_address(&self, num: usize) -> *mut u8 {
-        unsafe { self.first_page.offset((num * PAGE_SIZE) as isize) }
+    fn node_to_ptr(&self, node_num: usize) -> *mut u8 {
+        unsafe { self.first_page.offset((node_num * PAGE_SIZE) as isize) }
+    }
+
+    fn ptr_to_node(&self, ptr: *mut u8) -> usize {
+        let diff = (ptr as usize) - (self.first_page as usize);
+        debug_assert!(diff % 4096 == 0);
+        debug_assert!(diff / 4096 < self.nodes.len());
+        diff / 4096
     }
 }

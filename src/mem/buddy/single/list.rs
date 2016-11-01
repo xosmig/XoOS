@@ -30,7 +30,7 @@ impl Node {
         self.occupied = true;
     }
 
-    pub fn buddy_num(&self) -> usize {
+    pub fn get_buddy(&self) -> usize {
         self.buddy_on_level(self.level as usize)
     }
 
@@ -53,7 +53,7 @@ impl Node {
     pub fn ready(&self, buddy: &Node) -> bool {
         let ret = self.is_free() && self.level() == buddy.level();
         if ret {
-            debug_assert!(buddy.num() == self.buddy_num());
+            debug_assert!(buddy.num() == self.get_buddy());
         }
         ret
     }

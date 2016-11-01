@@ -115,7 +115,7 @@ pub mod tests {
 
     fn numbers() {
         let mut data = [0; 32];
-        let mut x: i64 = 123456789;
+        let x: i64 = 123456789;
         format!(data, "{}", x);
         assert!(data.starts_with(b"123456789"));
         format!(data, "{:#o}", x);

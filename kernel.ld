@@ -22,6 +22,6 @@ SECTIONS
 	. = ALIGN(PAGE_SIZE);
 
 	bss_phys_begin = . - VIRTUAL_BASE;
-	.bss : { *(.bss) }
+	.bss : { *(.bss .bss.*) }
 	BSS_PHYS_END = . - VIRTUAL_BASE;
 }
