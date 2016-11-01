@@ -15,6 +15,8 @@ pub struct BuddyBox {
     pointer: NonZero<*mut u8>,
 }
 
+/// Similar to std::boxed::Box.
+/// Provides ownership for an allocation, and drop its content when it go out of scope.
 impl Deref for BuddyBox {
     type Target = *mut u8;
     fn deref(&self) -> &Self::Target {
@@ -103,12 +105,18 @@ pub mod buddy_tests {
         let page2 = allocator.allocate(123).unwrap();
         let page3 = allocator.allocate(4096 * 2).unwrap();
         let page4 = allocator.allocate(4096 * 10).unwrap();
-        debug_assert!(page1 != page2);
-        debug_assert!(page1 != page3);
-        debug_assert!(page1 != page4);
-        debug_assert!(page2 != page3);
-        debug_assert!(page2 != page4);
-        debug_assert!(page3 != page4);
+
+        assert!(*page1 as usize % 4096 == 0);
+        assert!(*page2 as usize % 4096 == 0);
+        assert!(*page3 as usize % 4096 == 0);
+        assert!(*page4 as usize % 4096 == 0);
+
+        assert!(page1 != page2);
+        assert!(page1 != page3);
+        assert!(page1 != page4);
+        assert!(page2 != page3);
+        assert!(page2 != page4);
+        assert!(page3 != page4);
     }
 
     pub fn all() {

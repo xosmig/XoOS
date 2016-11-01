@@ -71,7 +71,6 @@ unsafe fn ini(info_ptr: usize) {
     let info = MultibootInfo::load(info_ptr);
     let mmap = info.memory_map();
 
-    use ::fmt::*;
     println!("{:?}", mmap);
 
     interrupts::init_default();
