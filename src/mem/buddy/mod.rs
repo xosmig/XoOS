@@ -2,7 +2,7 @@
 mod single;
 
 use ::prelude::*;
-use ::core::ops::{ Deref };
+use ::core::ops::Deref;
 use ::mem::paging::PAGE_SIZE;
 use ::utility::log2_ceil;
 use ::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
@@ -146,12 +146,16 @@ pub mod buddy_tests {
             levels
         };
 
+        // Allocate all, clear, allocate all again.
+        // Results of allocations must be identical.
         {
             let levels1 = allocate_max_levels();
             let levels2 = allocate_max_levels();
             assert_eq!(levels1, levels2);
         }
 
+        // Allocate all, clear, allocate some memory, allocate all again.
+        // Results of allocations must be different.
         {
             let levels1 = allocate_max_levels();
             let _page = BuddyAllocator::get_instance().allocate_level(0);
