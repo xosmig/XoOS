@@ -83,10 +83,16 @@ impl Single {
     }
 
     pub unsafe fn deallocate(&mut self, ptr: NonZero<*mut u8>) {
-        let node = self.ptr_to_node(*ptr);
-        assert!(self.nodes[node].is_occupied(), "Invalid buddy deallocate call on {:?}", *ptr);
-        self.nodes[node].set_free();
-        while let Some(node) = self.go_up_once(node) {};
+        let mut num = self.ptr_to_node(*ptr);
+        {
+            let node = &mut self.nodes[num];
+            assert!(node.is_occupied(), "Invalid buddy deallocate call on {:?}", *ptr);
+            node.set_free();
+            self.lists[node.level()].insert(node);
+        }
+        while let Some(next) = self.go_up_once(num) {
+            num = next;
+        }
     }
 
     /// Returns None if it can't be moved on the next level.

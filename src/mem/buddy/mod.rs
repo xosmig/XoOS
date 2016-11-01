@@ -124,7 +124,7 @@ pub mod buddy_tests {
         let allocate_max = || generate![max_possible_page(); N];
 
         let foo = || {
-            let mut pages = allocate_max();
+            let pages = allocate_max();
             let mut levels = [0; N];
             for (i, item) in pages.iter().enumerate() {
                 levels[i] = match item.as_ref() {
@@ -146,7 +146,7 @@ pub mod buddy_tests {
         let allocate_max = || generate![max_possible_page(); N];
 
         let foo = || {
-            let mut pages = allocate_max();
+            let pages = allocate_max();
             let mut levels = [0; N];
             for (i, item) in pages.iter().enumerate() {
                 levels[i] = match item.as_ref() {
@@ -158,7 +158,7 @@ pub mod buddy_tests {
         };
 
         let levels1 = foo();
-        let page = allocate_max();
+        let _page = allocate_max();
         let levels2 = foo();
 
         assert_ne!(levels1, levels2);
