@@ -71,11 +71,14 @@ impl Single {
     pub fn allocate(&mut self, req_level: usize) -> Option<NonZero<*mut u8>> {
         for lvl in req_level..self.height {
             if let Some(num) = self.lists[lvl].first() {
-                if self.nodes[num].is_free() {
-                    self.down_to_level(num, req_level);
-                    self.nodes[num].set_occupied();
-                    return Some(unsafe { NonZero::new(self.node_to_ptr(num)) });
+                debug_assert!(self.nodes[num].is_free());
+                self.down_to_level(num, req_level);
+                {
+                    let node = &mut self.nodes[num];
+                    node.set_occupied();
+                    self.lists[node.level()].remove(node);
                 }
+                return Some(unsafe { NonZero::new(self.node_to_ptr(num)) });
             }
         }
 
@@ -131,6 +134,7 @@ impl Single {
 
         let level = self.nodes[node].level();
         let buddy = self.nodes[node].buddy_on_level(level - 1);
+        assert!(level > 0);
         debug_assert!(node < buddy);
         debug_assert!(self.nodes[buddy].is_occupied());
 
@@ -145,12 +149,10 @@ impl Single {
         buddy.set_level(level - 1);
 
         self.lists[level - 1].insert(node);
-        self.lists[level - 1].insert(node);
+        self.lists[level - 1].insert(buddy);
     }
 
     fn down_to_level(&mut self, node: usize, req_level: usize) {
-        debug_assert!(self.nodes[node].is_free());
-
         while self.nodes[node].level() > req_level {
             self.go_down_once(node);
         }

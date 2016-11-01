@@ -120,10 +120,21 @@ pub mod buddy_tests {
     }
 
     fn allocate_big_twice_test() {
-        const N: usize = 10;
+        const N: usize = 32;
+
         let allocate_max = || generate![max_possible_page(); N];
 
-        let foo = || {
+        // assert allocate_max correctness
+        {
+            let _foo = allocate_max();
+            let bar = allocate_max();  // must be empty
+            for x in bar.iter() {
+                assert!(x.is_none());
+            }
+        }
+
+        let _page = BuddyAllocator::get_instance().allocate_level(0);
+        let allocate_max_levels = || {
             let pages = allocate_max();
             let mut levels = [0; N];
             for (i, item) in pages.iter().enumerate() {
@@ -135,38 +146,24 @@ pub mod buddy_tests {
             levels
         };
 
-        let levels1 = foo();
-        let levels2 = foo();
+        {
+            let levels1 = allocate_max_levels();
+            let levels2 = allocate_max_levels();
+            assert_eq!(levels1, levels2);
+        }
 
-        assert_eq!(levels1, levels2);
-    }
+        {
+            let levels1 = allocate_max_levels();
+            let _page = BuddyAllocator::get_instance().allocate_level(0);
+            let levels2 = allocate_max_levels();
+            assert_ne!(levels1, levels2);
+        }
 
-    fn allocate_different_big_twice_test() {
-        const N: usize = 10;
-        let allocate_max = || generate![max_possible_page(); N];
-
-        let foo = || {
-            let pages = allocate_max();
-            let mut levels = [0; N];
-            for (i, item) in pages.iter().enumerate() {
-                levels[i] = match item.as_ref() {
-                    Some(pair) => pair.1 as isize,
-                    None => -1,
-                };
-            }
-            levels
-        };
-
-        let levels1 = foo();
-        let _page = allocate_max();
-        let levels2 = foo();
-
-        assert_ne!(levels1, levels2);
     }
 
     fn max_possible_page() -> Option<(BuddyBox, usize)> {
         let allocator = BuddyAllocator::get_instance();
-        for level in (0..64).rev() {
+        for level in (0..32).rev() {
             let res = allocator.allocate_level(level);
             if let Some(page) = res {
                 return Some((page, level));
@@ -175,11 +172,9 @@ pub mod buddy_tests {
         None
     }
 
-
     pub fn all() {
         size_to_level_test();
         allocate_test();
         allocate_big_twice_test();
-        allocate_different_big_twice_test();
     }
 }

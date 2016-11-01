@@ -2,7 +2,7 @@
 use ::core::ptr::{ self, Shared };
 
 pub struct Node {
-    next: Option<Shared<Node>>,
+    pub next: Option<Shared<Node>>,
     prev: Option<Shared<Node>>,
     num: u32,
     level: u16,
@@ -71,7 +71,7 @@ impl List {
 
     pub fn remove(&mut self, node: &mut Node) {
         if let Some(ptr) = self.first {
-            if *ptr == node {
+            if *ptr as *const _ == node as *const _ {
                 self.first = node.next;
             }
         }
@@ -98,6 +98,8 @@ impl List {
             if let Some(second) = node.next {
                 unsafe { (**second).prev = self.first };
             }
+
+            debug_assert!(match node.next { Some(shared) => *shared != node, None => true });
         }
     }
 
