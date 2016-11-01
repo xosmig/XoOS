@@ -47,7 +47,7 @@ impl MemoryMap {
             // - 2 because we need place to insert the kernel section
             assert!(ret.len < MMAP_MAX_LEN - 2, ERROR_MSG);
 
-            if entry.start() < kernel_start && entry.end() >= kernel_end {
+            if entry.start() <= kernel_start && entry.end() >= kernel_end {
                 // insert the kernel section
                 assert!(entry.typ == EntryType::Available);
 

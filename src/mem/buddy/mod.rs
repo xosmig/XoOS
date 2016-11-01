@@ -119,8 +119,67 @@ pub mod buddy_tests {
         assert!(page3 != page4);
     }
 
+    fn allocate_big_twice_test() {
+        const N: usize = 10;
+        let allocate_max = || generate![max_possible_page(); N];
+
+        let foo = || {
+            let mut pages = allocate_max();
+            let mut levels = [0; N];
+            for (i, item) in pages.iter().enumerate() {
+                levels[i] = match item.as_ref() {
+                    Some(pair) => pair.1 as isize,
+                    None => -1,
+                };
+            }
+            levels
+        };
+
+        let levels1 = foo();
+        let levels2 = foo();
+
+        assert_eq!(levels1, levels2);
+    }
+
+    fn allocate_different_big_twice_test() {
+        const N: usize = 10;
+        let allocate_max = || generate![max_possible_page(); N];
+
+        let foo = || {
+            let mut pages = allocate_max();
+            let mut levels = [0; N];
+            for (i, item) in pages.iter().enumerate() {
+                levels[i] = match item.as_ref() {
+                    Some(pair) => pair.1 as isize,
+                    None => -1,
+                };
+            }
+            levels
+        };
+
+        let levels1 = foo();
+        let page = allocate_max();
+        let levels2 = foo();
+
+        assert_ne!(levels1, levels2);
+    }
+
+    fn max_possible_page() -> Option<(BuddyBox, usize)> {
+        let allocator = BuddyAllocator::get_instance();
+        for level in (0..64).rev() {
+            let res = allocator.allocate_level(level);
+            if let Some(page) = res {
+                return Some((page, level));
+            }
+        }
+        None
+    }
+
+
     pub fn all() {
         size_to_level_test();
         allocate_test();
+        allocate_big_twice_test();
+        allocate_different_big_twice_test();
     }
 }

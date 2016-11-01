@@ -85,23 +85,25 @@ impl Single {
     pub unsafe fn deallocate(&mut self, ptr: NonZero<*mut u8>) {
         let node = self.ptr_to_node(*ptr);
         assert!(self.nodes[node].is_occupied(), "Invalid buddy deallocate call on {:?}", *ptr);
-        let buddy = self.nodes[node].get_buddy();
-        debug_assert!(self.nodes[buddy].level() <= self.nodes[node].level());
+        self.nodes[node].set_free();
+        while let Some(node) = self.go_up_once(node) {};
     }
 
-    fn go_up_once(&mut self, num: usize) -> bool {
-        debug_assert!(self.nodes[num].is_free());
-        let level = self.nodes[num].level();
-        let buddy = self.nodes[num].get_buddy();
+    /// Returns None if it can't be moved on the next level.
+    /// Otherwise returns a number of the main node in the pair on the next level.
+    fn go_up_once(&mut self, node: usize) -> Option<usize> {
+        debug_assert!(self.nodes[node].is_free());
+        let level = self.nodes[node].level();
+        let buddy = self.nodes[node].get_buddy();
 
-        if buddy >= self.nodes.len() || !self.nodes[buddy].ready(&self.nodes[num]) {
-            return false;
+        if buddy >= self.nodes.len() || !self.nodes[buddy].ready(&self.nodes[node]) {
+            return None;
         }
 
         debug_assert!(level + 1 < self.height);
 
-        let major = min(num, buddy);
-        let minor = max(num, buddy);
+        let major = min(node, buddy);
+        let minor = max(node, buddy);
 
         let (left, right) = self.nodes.split_at_mut(minor);
         let major = &mut left[major];
@@ -115,7 +117,7 @@ impl Single {
 
         self.lists[level + 1].insert(major);
 
-        true
+        Some(major.num())
     }
 
     fn go_down_once(&mut self, node: usize) {
