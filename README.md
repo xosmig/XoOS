@@ -12,7 +12,7 @@ https://github.com/japaric/xargo#dependencies
 # Makefile
 ## environment variables:
 * CFG='opt1 opt2'
-   * Available options: gdb, os_test (not just test!!)
+   * Available options: gdb, os_test
 * RUSTFLAGS
 
 ## usefull targets:

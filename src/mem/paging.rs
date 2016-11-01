@@ -9,6 +9,7 @@ extern {
     static mut PML3: PagingTable;
 }
 
+pub const MEMORY_START: usize = (!(1 << 47)) + 1 /* = 2^64 - 2^47*/;
 pub const KERNEL_START: usize = 0xffffffff80000000;
 
 pub const PAGE_SIZE: usize = 4096;

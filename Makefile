@@ -27,7 +27,7 @@ RES := $(RES_DIR)/kernel
 RES_DIR_RELEASE := bin/release
 RES_RELEASE := $(RES_DIR_RELEASE)/kernel
 
-.PHONY: clean default build build_rust run gdb qemu release build_rust_release tests
+.PHONY: clean default build build_rust run gdb qemu release build_rust_release
 
 # ======= useful targets: =======
 
@@ -36,6 +36,9 @@ default: build
 release: $(RES_RELEASE)
 
 build: $(RES)
+
+tests:
+	CFG='os_test' make run
 
 run: $(RES) qemu
 

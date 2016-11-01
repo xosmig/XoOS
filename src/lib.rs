@@ -3,8 +3,13 @@
 #![feature(const_fn)]
 #![feature(stmt_expr_attributes)]
 #![feature(shared)]
+#![feature(nonzero)]
+#![feature(step_by)]
 
 #![no_std]
+
+#![allow(unused_unsafe)]
+#![allow(unused_imports)]
 
 extern crate rlibc;
 
@@ -41,7 +46,6 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
 
 
 fn main() {
-
 }
 
 
@@ -51,6 +55,7 @@ fn test_all() {
     ioports::ioports_tests::all();
     utility::utility_tests::all();
     mem::paging::tests::all();
+    mem::buddy::tests::all();
 }
 
 
@@ -65,9 +70,12 @@ unsafe fn ini(info_ptr: usize) {
     let info = MultibootInfo::load(info_ptr);
     let mmap = info.memory_map();
 
+    use ::fmt::*;
+    println!("{:?}", mmap);
+
     interrupts::init_default();
     mem::paging::init_default();
-    mem::buddy::init_default(&mmap);
+    mem::buddy::BuddyAllocator::init_default(&mmap);
 }
 
 
