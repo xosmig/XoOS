@@ -5,6 +5,7 @@
 #![feature(shared)]
 #![feature(nonzero)]
 #![feature(step_by)]
+#![feature(associated_consts)]
 
 #![no_std]
 
@@ -29,6 +30,7 @@ pub mod vga;
 pub mod pit;
 pub mod boot_info;
 pub mod mem;
+#[cfg(os_test)] pub mod tests;
 
 use fmt::Write;
 use boot_info::MultibootInfo;
@@ -39,7 +41,7 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
     #[cfg(gdb)] gdb_start();
     ini(info_ptr);
 
-    #[cfg(os_test)] test_all();
+    #[cfg(os_test)] tests::test_all();
     #[cfg(not(os_test))] main();
 
     end();
@@ -47,16 +49,6 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
 
 
 fn main() {
-}
-
-
-#[cfg(os_test)]
-fn test_all() {
-    fmt::tests::all();
-    ioports::ioports_tests::all();
-    utility::utility_tests::all();
-    mem::paging::tests::all();
-    mem::buddy::buddy_tests::all();
 }
 
 

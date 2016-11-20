@@ -178,10 +178,8 @@ pub mod buddy_tests {
     }
 
     pub fn all() {
-        println!("buddy allocator tests... running");
         size_to_level_test();
         allocate_test();
         allocate_big_twice_test();
-        println!("buddy allocator tests... OK");
     }
 }
