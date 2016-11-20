@@ -9,7 +9,7 @@ use ::core::slice;
 use ::core::cmp::{min, max};
 
 use self::entry::*;
-use super::super::list::*;
+use super::super::inplace_list::*;
 
 
 const MIN_SIZE: usize = PAGE_SIZE * 10;

@@ -1,5 +1,5 @@
 
-mod list;
+mod inplace_list;
 
 pub mod paging;
 pub mod memory_map;
