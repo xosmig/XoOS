@@ -25,5 +25,9 @@ macro_rules! tryo(
     )
 );
 
-
+/// A horrible macro to deceive the borrow checker
+macro_rules! reborrow_mut {
+    ($mref: expr) => ({ &mut *($mref as *mut _) });
+    ($mref: expr, $t: tt) => ({ &mut *($mref as *mut $t) });
+}
 

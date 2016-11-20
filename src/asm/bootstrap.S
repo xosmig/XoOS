@@ -339,7 +339,7 @@ MAKE_INTERRUPT_HANDLER(63)
 
 	.bss
 	.align PAGE_SIZE
-	.space 2 * PAGE_SIZE // I need a really big stack to put a memory map in
+	.space 8 * PAGE_SIZE
 bootstrap_stack_top:
 	.align PAGE_SIZE
 PML4:
