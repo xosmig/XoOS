@@ -87,8 +87,7 @@ impl BuddyAllocator {
 
 #[cfg(os_test)]
 pub mod buddy_tests {
-    tests_subcrate!(
-        "buddy_allocator",
+    tests_module!("buddy_allocator",
         size_to_level_test,
         allocate_test,
         allocate_big_twice_test,

@@ -1,5 +1,5 @@
 
-macro_rules! tests_subcrate {
+macro_rules! tests_module {
     ($name: expr, $( $test: ident ),*, ) => {
         use super::*;
         use ::prelude::*;

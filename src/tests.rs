@@ -3,8 +3,9 @@ macro_rules! test_set {
     ($path: path) => { run_test_set::<$path>() };
 }
 
-/// Add your tests subcrate here
-pub fn test_all() {
+/// Add your tests set here
+fn test_sets() {
+    //test_set!(path_to_your_tests_module::Tests);
     test_set!(::mem::buddy::buddy_tests::Tests);
     test_set!(::tests::sample_mod::sample_mod_tests::Tests);
 
@@ -37,6 +38,17 @@ fn run_test_set<T: TestSet>() {
     }
 }
 
+pub fn test_all() {
+    println!("");
+    println!("Run all tests:");
+    println!("");
+
+    test_sets();
+
+    println!("");
+    println!("all tests passed [^_^]");
+    println!("");
+}
 
 /// Sample of tests subcrate.
 mod sample_mod {
@@ -45,7 +57,7 @@ mod sample_mod {
     
     #[cfg(os_test)]
     pub mod sample_mod_tests {
-        tests_subcrate!("sample_mod",
+        tests_module!("sample_mod",
             sample1,
             two_less_than_five,
         );
