@@ -5,6 +5,7 @@ pub mod paging;
 pub mod memory_map;
 
 pub mod buddy;
+pub mod slab;
 
 pub use ::core::mem::*;
 

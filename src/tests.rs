@@ -11,6 +11,7 @@ fn test_sets() {
     test_set!(mem::buddy::buddy_tests::Tests);
     test_set!(::ioports::ioports_tests::Tests);
     test_set!(utility::utility_tests::Tests);
+    test_set!(mem::slab::small::small_slab_tests::Tests);
 }
 
 

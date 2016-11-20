@@ -20,6 +20,14 @@ impl<T> Node<T> {
     pub fn as_ref(&self) -> &T {
         &self.object
     }
+
+    pub fn next(&self) -> Option<&Node<T>> {
+        self.next.map(|x| unsafe { &**x })
+    }
+
+    pub fn next_mut(&mut self) -> Option<&mut Node<T>> {
+        self.next.map(|x| unsafe { &mut **x })
+    }
 }
 
 
@@ -29,10 +37,9 @@ pub struct InplaceList<T> {
 
 /// Provides some kind of double linked list without memory allocator.
 /// In order to add a `Node` to the list one have to create it themselves and use `insert` method.
-/// All operations with it are unsafe.
 impl<T> InplaceList<T> {
     /// Crates an empty `InplaceList`.
-    pub const unsafe fn new() -> Self {
+    pub const fn new() -> Self {
         InplaceList { first: None }
     }
 
@@ -45,10 +52,10 @@ impl<T> InplaceList<T> {
         }
 
         if let Some(prev) = node.prev {
-            unsafe { (**prev).next = node.next };
+            (**prev).next = node.next;
         }
         if let Some(next) = node.next {
-            unsafe { (**next).prev = node.prev };
+            (**next).prev = node.prev;
         }
         node.next = None;
         node.prev = None;
@@ -56,23 +63,25 @@ impl<T> InplaceList<T> {
 
     /// insert node into the first place in list
     pub unsafe fn insert(&mut self, node: &mut Node<T>) {
-        unsafe {
-            // change links in `other`
-            node.prev = None;
-            node.next = self.first;
+        // change links in `other`
+        node.prev = None;
+        node.next = self.first;
 
-            self.first = Some(Shared::new(node));
-            // note: next is already updated (former self.first)
-            if let Some(second) = node.next {
-                unsafe { (**second).prev = self.first };
-            }
-
-            debug_assert!(match node.next { Some(shared) => *shared != node, None => true });
+        self.first = Some(Shared::new(node));
+        // note: next is already updated (former self.first)
+        if let Some(second) = node.next {
+            unsafe { (**second).prev = self.first };
         }
+
+        debug_assert!(match node.next { Some(shared) => *shared != node, None => true });
     }
 
-    pub unsafe fn first(&self) -> Option<&Node<T>> {
+    pub fn first(&self) -> Option<&Node<T>> {
         self.first.map(|x| unsafe { &(**x) })
+    }
+
+    pub fn first_mut(&self) -> Option<&mut Node<T>> {
+        self.first.map(|x| unsafe { &mut (**x) })
     }
 
     /*pub unsafe fn iter_mut(&mut self) -> IterMut<T> {

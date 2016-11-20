@@ -9,8 +9,7 @@
 
 #![no_std]
 
-#![allow(unused_unsafe)]
-#![allow(unused_imports)]
+#![cfg_attr(os_test, allow(unused))]
 
 extern crate rlibc;
 
@@ -30,7 +29,7 @@ pub mod pit;
 pub mod boot_info;
 pub mod mem;
 
-use fmt::Write;
+use ::prelude::*;
 use boot_info::MultibootInfo;
 use mem::memory_map::MemoryMap;
 
@@ -45,7 +44,6 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
     end();
 }
 
-#[cfg(not(os_test))]
 fn main() {
 }
 

@@ -1,8 +1,8 @@
 
 
-// [val, val, val, ... (len times) ]
+/// [val, val, val, ... (len times) ]
 macro_rules! generate(
-    ($val:expr; $len:expr) => (
+    ($val: expr; $len: expr) => (
         {
             let mut array: [_; $len] = unsafe { ::mem::uninitialized() };
             for i in array.iter_mut() {
@@ -12,3 +12,18 @@ macro_rules! generate(
         }
     )
 );
+
+/// `try!` for `Option`
+macro_rules! tryo(
+    ($opt: expr) => (
+        {
+            match $opt {
+                Some(obj) => obj,
+                None => { return None; },
+            }
+        }
+    )
+);
+
+
+

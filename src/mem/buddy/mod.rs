@@ -54,7 +54,8 @@ impl BuddyAllocator {
         }
     }
 
-    pub fn get_instance() -> &'static mut Self {
+    /// It's in terms of races.
+    pub unsafe fn get_instance() -> &'static mut Self {
         unsafe { &mut INSTANCE }
     }
 
@@ -106,7 +107,7 @@ pub mod buddy_tests {
     }
 
     fn allocate_test() {
-        let allocator = BuddyAllocator::get_instance();
+        let allocator = unsafe { BuddyAllocator::get_instance() };
         let page1 = allocator.allocate(123).unwrap();
         let page2 = allocator.allocate(123).unwrap();
         let page3 = allocator.allocate(4096 * 2).unwrap();
@@ -139,7 +140,7 @@ pub mod buddy_tests {
             }
         }
 
-        let _page = BuddyAllocator::get_instance().allocate_level(0);
+        let _page = unsafe { BuddyAllocator::get_instance().allocate_level(0) };
         let allocate_max_levels = || {
             let pages = allocate_max();
             let mut levels = [0; N];
@@ -164,7 +165,7 @@ pub mod buddy_tests {
         // Results of allocations must be different.
         {
             let levels1 = allocate_max_levels();
-            let _page = BuddyAllocator::get_instance().allocate_level(0);
+            let _page = unsafe { BuddyAllocator::get_instance().allocate_level(0) };
             let levels2 = allocate_max_levels();
             assert_ne!(levels1, levels2);
         }
@@ -172,7 +173,7 @@ pub mod buddy_tests {
     }
 
     fn max_possible_page() -> Option<(BuddyBox, usize)> {
-        let allocator = BuddyAllocator::get_instance();
+        let allocator = unsafe { BuddyAllocator::get_instance() };
         for level in (0..32).rev() {
             let res = allocator.allocate_level(level);
             if let Some(page) = res {
