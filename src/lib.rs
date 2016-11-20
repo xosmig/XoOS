@@ -29,7 +29,7 @@ pub mod pit;
 pub mod boot_info;
 pub mod mem;
 
-use ::prelude::*;
+use ::prelude::without_core::*;
 use boot_info::MultibootInfo;
 use mem::memory_map::MemoryMap;
 

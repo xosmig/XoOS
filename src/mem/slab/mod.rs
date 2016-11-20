@@ -3,21 +3,26 @@ use ::prelude::*;
 use mem::inplace_list::{ self, InplaceList };
 use mem::buddy::*;
 use mem::paging::PAGE_SIZE;
+use core::marker::PhantomData;
 
 type Node = inplace_list::Node<()>;
-type PageNode = inplace_list::Node<Page>;
+type PageNode<'a> = inplace_list::Node<Page<'a>>;
 
-struct Page {
+struct Page<'a> {
     bbox: BuddyBox,
-    /// the number of allocated frames on this page
+    /// The number of allocated frames on this page.
     cnt: usize,
+    allocator: Shared<SlabAllocator<'a>>,
+    phantom: PhantomData<&'a u8>
 }
 
-impl Page {
-    fn allocate() -> Option<Self> {
+impl<'a> Page<'a> {
+    fn allocate(allocator: &'a mut SlabAllocator) -> Option<Page<'a>> {
         Some(Page {
             bbox: tryo!(unsafe { BuddyAllocator::get_instance().allocate_level(0) }),
             cnt: 0,
+            allocator: unsafe { Shared::new(allocator) },
+            phantom: PhantomData,
         })
     }
 
@@ -37,94 +42,136 @@ impl Page {
     fn ptr(&self) -> NonZero<*mut u8> {
         *self.bbox
     }
+
+    unsafe fn get_allocator(&mut self) -> &'a mut SlabAllocator {
+        &mut **self.allocator
+    }
 }
 
 // https://github.com/rust-lang/rfcs/issues/1144
+
 /// Must be at least size_of::<Node>()
 pub const MIN_FRAME_SIZE: usize = 16;
-pub const MAX_FRAME_SIZE: usize = PAGE_SIZE / 2 - 1;
+/// 2 * MAX_FRAME_SIZE should be not more than amount of free space in page
+pub const MAX_FRAME_SIZE: usize = PAGE_SIZE / 2 - 16;
 
-pub struct SlabAllocator {
+pub struct SlabAllocator<'a> {
     frame_size: usize,
     frames: InplaceList<()>,
-    pages: InplaceList<Page>,
+    // the first page may be not completely initialized
+    pages: InplaceList<Page<'a>>,
+    /// The number of nodes initialized in the first page.
+    /// Provides lazy page initialization. It's extremely beneficial in some cases.
+    first_page_initialized: usize,
 }
 
-impl SlabAllocator {
+
+impl<'a> SlabAllocator<'a> {
     /// `MIN_FRAME_SIZE` ≤ `frame_size` ≤ `MAX_FRAME_SIZE` .
     /// `frame_size` must be divisible by 8 for correct alignment.
+    /// The function has to be unchecked in order to be `const`
+    pub const unsafe fn new_unchecked(frame_size: usize) -> Self {
+        SlabAllocator {
+            frame_size: frame_size,
+            frames: InplaceList::new(),
+            pages: InplaceList::new(),
+            first_page_initialized: usize::max_value(),
+        }
+    }
+
+    /// Same as `new_unchecked`, but checks if `frame_size` is incorrect.
     pub fn new(frame_size: usize) -> Self {
         assert!(frame_size <= MAX_FRAME_SIZE);
         assert!(frame_size >= MIN_FRAME_SIZE);
         assert!(frame_size % 8 == 0);
 
-        let mut res = SlabAllocator {
-            frame_size: frame_size,
-            frames: InplaceList::new(),
-            pages: InplaceList::new(),
-        };
-        res
+        unsafe { Self::new_unchecked(frame_size) }
     }
 
     pub fn allocate(&mut self) -> Option<NonZero<*mut u8>> {
-        // FIXME: horrible hack
+        // FIXME: avoid reborrow_mut
         let self2 = unsafe { reborrow_mut!(self, Self) };
 
         if let Some(node) = self.frames.first_mut() {
             unsafe { self2.frames.remove(node); }
 
             let res = node as *mut Node as *mut u8;
-            debug_assert!(res as usize != 0);
-            let res = unsafe { NonZero::new(res) };
 
             unsafe { Self::get_page_node(res).as_mut().inc() };
             debug_assert!(
-                unsafe { Self::get_page_node(res).as_ref().allocated() <=
-                    (PAGE_SIZE - size_of::<PageNode>()) / self.frame_size }
+                unsafe { Self::get_page_node(res).as_ref().allocated() <= self.frames_per_page() }
             );
 
-            return Some(res);
+            debug_assert!(res as usize != 0);
+            return Some(unsafe { NonZero::new(res) });
         }
 
-        // we have to allocate new page
-        tryo!(self.allocate_page());
-        debug_assert!(self.frames.first_mut().is_some());
+        if self.first_page_initialized >= self.frames_per_page() {
+            // we have to allocate new page
+            tryo!(self.allocate_page());
+        }
+
+        self.initialize_node();
         self.allocate()  // recursion
     }
 
-//    pub unsafe fn deallocate(&mut self, address: *mut u8) {
-//        let page_node = Self::get_page_node(address);
-//        let node = Self::get_node(address);
-//        self.frames.insert();
-//    }
+    /*pub unsafe fn deallocate(&mut self, ptr: *mut u8) {
+        debug_assert!(ptr != 0);
+        let page_node = Self::get_page_node(ptr);
+        page_node.as_mut().dec();
+//        if page_node.as_ref().allocated() == 0 {
+//            deallocate_page;
+//        }
+        self.add_node(ptr);
+    }*/
 
     fn allocate_page(&mut self) -> Option<()> {
-        let page = tryo!(Page::allocate());
-        let page_start = *page.ptr();
-
-        let mut cur_ptr = unsafe {
-            ptr::write(page_start as *mut PageNode, PageNode::new(page));
-            self.pages.insert(&mut *(page_start as *mut PageNode));
-            page_start.offset(size_of::<PageNode>() as isize)
+        let page: Page<'a> = unsafe {
+            // FIXME: avoid reborrow_mut
+            let self2 = reborrow_mut!(self);
+            tryo!(Page::allocate(self2))
         };
 
-        while PAGE_SIZE - ((cur_ptr as usize) - (page_start as usize)) >= self.frame_size {
-            cur_ptr = unsafe {
-                ptr::write(cur_ptr as *mut Node, Node::new(()));
-                self.frames.insert(&mut *(cur_ptr as *mut Node));
-                cur_ptr.offset(self.frame_size as isize)
-            }
-        }
+        let page_start = *page.ptr();
+
+        unsafe {
+            ptr::write(page_start as *mut PageNode, PageNode::new(page));
+            self.pages.insert(&mut *(page_start as *mut PageNode));
+        };
+
+        self.first_page_initialized = 0;
+
+        debug_assert!(self.pages.first().is_some());
         Some(())
     }
 
-//    unsafe fn get_node(ptr: *mut u8) -> &'static mut Node {
-//
-//    }
+    fn initialize_node(&mut self) {
+        let page_begin = *self.pages.first_mut().unwrap().as_mut().ptr();
+        let offset = size_of::<PageNode>() + self.frame_size * self.first_page_initialized;
+        debug_assert!(offset + self.frame_size <= PAGE_SIZE);
+        unsafe {
+            let ptr = page_begin.offset(offset as isize);
+            self.add_node(ptr);
+        }
+        self.first_page_initialized += 1;
 
-    unsafe fn get_page_node(ptr: NonZero<*mut u8>) -> &'static mut PageNode {
+        debug_assert!(self.frames.first_mut().is_some());
+
+    }
+
+    unsafe fn add_node(&mut self, ptr: *mut u8) {
+        let p = ptr as *mut Node;
+        ptr::write(p, Node::new(()));
+        self.frames.insert(&mut *(p));
+    }
+
+    unsafe fn get_page_node(ptr: *mut u8) -> &'a mut PageNode<'a> {
         // page node is in the begin of a page
-        unsafe { &mut *(utility::round_down(*ptr as usize, PAGE_SIZE) as *mut PageNode) }
+        &mut *(utility::round_down(ptr as usize, PAGE_SIZE) as *mut PageNode)
+    }
+
+    fn frames_per_page(&self) -> usize {
+        (PAGE_SIZE - size_of::<PageNode>()) / self.frame_size
     }
 }
 
@@ -133,6 +180,8 @@ impl SlabAllocator {
 pub mod slab_tests {
     use super::*;
     use super::{ Node, PageNode };
+    use mem::paging::PAGE_SIZE;
+
     tests_module!("slab_allocator",
         min_frame_at_least_node_size,
         simple_allocate_test,
@@ -145,7 +194,7 @@ pub mod slab_tests {
 
     fn simple_allocate_test() {
         const N: usize = 100;
-        const SIZE: usize = 128;
+        const SIZE: usize = 160;
 
         let mut allocator = SlabAllocator::new(SIZE);
         let mut ptrs = [None; N];
@@ -161,3 +210,4 @@ pub mod slab_tests {
         }
     }
 }
+
