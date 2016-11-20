@@ -6,6 +6,17 @@ pub enum TestSetEntry {
     Set(&'static TestSet),
 }
 
+impl TestSetEntry {
+    pub fn run(&self) {
+        match self {
+            &Test(f) => {
+                f()
+            },
+            &Set(s) => s.run(),
+        }
+    }
+}
+
 pub use self::TestSetEntry::Test;
 pub use self::TestSetEntry::Set;
 
@@ -15,10 +26,11 @@ pub trait TestSet {
     const TESTS: TestsT;
 }
 
-fn run_test_set<T: TestSet>() {
-//    println!("running tests for \"{}\"", T::name());
-//    println!("tests for \"{}\" ... OK", T::name());
-}
+//fn run_test_set<T: TestSet>() {
+//    for entry in T::TESTS {
+//        entry
+//    }
+//}
 
 pub fn test_all() {
 
