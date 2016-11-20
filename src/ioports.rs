@@ -1,5 +1,5 @@
-/// wrapper for `in` and `out` asm commands.
-/// it is `read` and `write` because `in` is a rust keyword.
+/// Wrapper for `in` and `out` asm commands.
+/// It is `read` and `write` because `in` is a rust keyword.
 
 use ::core::marker::PhantomData;
 
@@ -82,13 +82,10 @@ impl<In> OutPort for IOPort<In, u32> {
 #[cfg(os_test)]
 pub mod ioports_tests {
     use super::*;
-    use ::fmt::Write;
+    tests_module!("ioports",
+        make_instance,
+    );
 
-    pub fn all() {
-        println!("ioports tests... running");
-        make_instance();
-        println!("ioports tests... OK");
-    }
 
     fn make_instance() {
         // it will test asm correctness

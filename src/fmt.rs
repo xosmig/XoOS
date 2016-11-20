@@ -89,15 +89,13 @@ macro_rules! format {
 }
 
 #[cfg(os_test)]
-pub mod tests {
-    use super::*;
+pub mod fmt_tests {
+    use super::Buffer;
+    tests_module!("fmt",
+        overflow,
+        numbers,
+    );
 
-    pub fn all() {
-        println!("fmt tests... running");
-        overflow();
-        numbers();
-        println!("fmt tests... OK");
-    }
 
     fn overflow() {
         let mut data = [0; 10];

@@ -87,6 +87,7 @@ impl BuddyAllocator {
 
 #[cfg(os_test)]
 pub mod buddy_tests {
+    use super::*;
     tests_module!("buddy_allocator",
         size_to_level_test,
         allocate_test,

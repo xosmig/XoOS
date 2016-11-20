@@ -157,10 +157,12 @@ pub unsafe fn init_default() {
 }
 
 #[cfg(os_test)]
-pub mod tests {
-    use super::*;
+pub mod paging_tests {
+    tests_module!("paging",
+        todo,
+    );
 
-    pub fn all() {
+    fn todo() {
         // TODO
     }
 }

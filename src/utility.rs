@@ -65,6 +65,11 @@ pub fn round_down<T:UInt>(x: T, base:T) -> T {
 #[cfg(os_test)]
 pub mod utility_tests {
     use super::*;
+    tests_module!("utility",
+        log2_floor_test,
+        log2_ceil_test,
+    );
+
 
     fn log2_floor_test() {
         assert_eq!(0, log2_floor(1 as u8));
@@ -80,10 +85,5 @@ pub mod utility_tests {
         assert_eq!(2, log2_ceil(3 as u32));
         assert_eq!(2, log2_ceil(4 as u64));
         assert_eq!(9, log2_ceil(257 as u64));
-    }
-
-    pub fn all() {
-        log2_floor_test();
-        log2_ceil_test();
     }
 }

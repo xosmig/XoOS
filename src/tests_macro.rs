@@ -1,7 +1,6 @@
 
 macro_rules! tests_module {
-    ($name: expr, $( $test: ident ),*, ) => {
-        use super::*;
+    ($name: expr, $( $test: ident ),* ) => {
         use ::prelude::*;
         use ::tests::*;
         pub struct Tests;
@@ -13,4 +12,9 @@ macro_rules! tests_module {
             ];
         }
     };
+
+    // version with extra comma at the end
+    ($name: expr, $( $test: ident ),*, ) => {
+        tests_module!($name $(, $test)*);
+    }
 }

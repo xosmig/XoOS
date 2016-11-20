@@ -3,18 +3,14 @@ macro_rules! test_set {
     ($path: path) => { run_test_set::<$path>() };
 }
 
-/// Add your tests set here
+/// Add your test set here
 fn test_sets() {
     //test_set!(path_to_your_tests_module::Tests);
-    test_set!(::mem::buddy::buddy_tests::Tests);
     test_set!(::tests::sample_mod::sample_mod_tests::Tests);
-
-    /*
-    ::fmt::tests::all();
-    ::ioports::ioports_tests::all();
-    ::utility::utility_tests::all();
-    ::mem::paging::tests::all();
-    */
+    test_set!(mem::paging::paging_tests::Tests);
+    test_set!(mem::buddy::buddy_tests::Tests);
+    test_set!(::ioports::ioports_tests::Tests);
+    test_set!(utility::utility_tests::Tests);
 }
 
 
@@ -57,6 +53,7 @@ mod sample_mod {
     
     #[cfg(os_test)]
     pub mod sample_mod_tests {
+        use super::*;
         tests_module!("sample_mod",
             sample1,
             two_less_than_five,

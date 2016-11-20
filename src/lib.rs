@@ -15,8 +15,8 @@
 extern crate rlibc;
 
 #[macro_use] pub mod macro_utility;
-#[macro_use] pub mod fmt;
 #[cfg(os_test)] #[macro_use] pub mod tests_macro;
+#[macro_use] pub mod fmt;
 #[cfg(os_test)] pub mod tests;
 #[macro_use] pub mod interrupts;
 
