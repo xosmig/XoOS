@@ -16,3 +16,5 @@ panic = "abort" # Disable unwinding for debug build.
 # The release profile, used for `cargo build --release`.
 [profile.release]
 panic = "abort" # Disable unwinding for release build.
+
+[workspace]

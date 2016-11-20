@@ -10,6 +10,7 @@ pub use ::core::{
 };
 
 pub use ::fmt::Write;  // for println!(...)
+//pub use ::fmt::*;  // for println!(...)
 pub use ::core::nonzero::NonZero;
 pub use ::core::ptr::Shared;
 pub use ::core::mem::{ size_of, size_of_val };

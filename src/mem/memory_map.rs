@@ -1,5 +1,6 @@
-use ::core::mem::{size_of, size_of_val};
-use ::fmt::{self, Formatter, Debug};
+
+use ::prelude::*;
+use fmt::{Formatter, Debug};
 
 #[allow(improper_ctypes)]
 extern {

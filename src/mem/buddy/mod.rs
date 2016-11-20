@@ -87,6 +87,7 @@ impl BuddyAllocator {
 #[cfg(os_test)]
 pub mod buddy_tests {
     use super::*;
+    use ::prelude::*;
 
     fn size_to_level_test() {
         assert_eq!(0, BuddyAllocator::size_to_level(1));
@@ -177,8 +178,10 @@ pub mod buddy_tests {
     }
 
     pub fn all() {
+        println!("buddy allocator tests... running");
         size_to_level_test();
         allocate_test();
         allocate_big_twice_test();
+        println!("buddy allocator tests... OK");
     }
 }
