@@ -1,39 +1,22 @@
 
 use ::prelude::*;
 
-pub enum TestSetEntry {
-    Test(&'static Fn() -> ()),
-    Set(&'static TestSet),
-}
-
-impl TestSetEntry {
-    pub fn run(&self) {
-        match self {
-            &Test(f) => {
-                f()
-            },
-            &Set(s) => s.run(),
-        }
-    }
-}
-
-pub use self::TestSetEntry::Test;
-pub use self::TestSetEntry::Set;
-
-pub type TestsT = &'static [(TestSetEntry, &'static str)];
+pub type TestsT = &'static [(&'static Fn() -> (), &'static str)];
 
 pub trait TestSet {
     const TESTS: TestsT;
 }
 
-//fn run_test_set<T: TestSet>() {
-//    for entry in T::TESTS {
-//        entry
-//    }
-//}
+fn run_test_set<T: TestSet>() {
+    for &(test, name) in T::TESTS {
+        print!("test \"{}\" ... ", name);
+        test();
+        println!("OK");
+    }
+}
 
 pub fn test_all() {
-
+    run_test_set::<::tests::sample_tests::SampleTestSet>()
 
     /*::fmt::tests::all();
     ::ioports::ioports_tests::all();
@@ -48,7 +31,7 @@ pub fn test_all() {
 mod sample_tests {
     use ::tests::*;
 
-    struct SampleTestSet;
+    pub struct SampleTestSet;
 
     fn foo() {
         assert!(0 == 0);
@@ -60,8 +43,8 @@ mod sample_tests {
 
     impl TestSet for SampleTestSet {
         const TESTS: TestsT = &[
-            (Test(&foo), "sample1"),
-            (Test(&bar), "sample2"),
+            (&foo, "tests_lib sample1"),
+            (&bar, "tests_lib sample2"),
         ];
     }
 }

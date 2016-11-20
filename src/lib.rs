@@ -47,7 +47,7 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
     end();
 }
 
-
+#[cfg(not(os_test))]
 fn main() {
 }
 
