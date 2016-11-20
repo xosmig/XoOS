@@ -1,4 +1,24 @@
 
+macro_rules! test_set {
+    ($path: path) => { run_test_set::<$path>() };
+}
+
+/// Add your tests subcrate here
+pub fn test_all() {
+    test_set!(::mem::buddy::buddy_tests::Tests);
+    test_set!(::tests::sample_mod::sample_mod_tests::Tests);
+
+    /*
+    ::fmt::tests::all();
+    ::ioports::ioports_tests::all();
+    ::utility::utility_tests::all();
+    ::mem::paging::tests::all();
+    */
+}
+
+
+// ======================================================================
+
 use ::prelude::*;
 
 pub type NameT = &'static str;
@@ -17,30 +37,6 @@ fn run_test_set<T: TestSet>() {
     }
 }
 
-pub fn test_all() {
-    run_test_set::<::tests::sample_mod::sample_mod_tests::Tests>()
-
-    /*::fmt::tests::all();
-    ::ioports::ioports_tests::all();
-    ::utility::utility_tests::all();
-    ::mem::paging::tests::all();
-    ::mem::buddy::buddy_tests::all();*/
-}
-
-macro_rules! tests_subcrate {
-    ($name: expr, $tests: expr) => {
-        use super::*;
-        use ::prelude::*;
-        use ::tests::*;
-        pub struct Tests;
-
-        impl TestSet for Tests {
-            const NAME: NameT = $name;
-            const TESTS: TestsT = &$tests;
-        }
-    };
-}
-
 
 /// Sample of tests subcrate.
 mod sample_mod {
@@ -49,12 +45,13 @@ mod sample_mod {
     
     #[cfg(os_test)]
     pub mod sample_mod_tests {
-        tests_subcrate!("sample_mod", [
-            (&foo, "sample1"),
-            (&two_less_than_five, "sample2"),
-        ]);
+        tests_subcrate!("sample_mod",
+            sample1,
+            two_less_than_five,
+        );
 
-        fn foo() {
+
+        fn sample1() {
             assert!(0 == 0);
         }
 

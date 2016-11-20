@@ -84,22 +84,15 @@ impl BuddyAllocator {
     }
 }
 
-/*
+
 #[cfg(os_test)]
 pub mod buddy_tests {
-    use ::tests::*;
-    pub struct Tests;
-
-    impl TestSet for Tests {
-        const TESTS: TestsT = &[
-            (&foo, "tests_lib sample1"),
-            (&bar, "tests_lib sample2"),
-        ];
-    }
-
-
-    use super::*;
-    use ::prelude::*;
+    tests_subcrate!(
+        "buddy_allocator",
+        size_to_level_test,
+        allocate_test,
+        allocate_big_twice_test,
+    );
 
     fn size_to_level_test() {
         assert_eq!(0, BuddyAllocator::size_to_level(1));
@@ -188,11 +181,4 @@ pub mod buddy_tests {
         }
         None
     }
-
-    pub fn all() {
-        size_to_level_test();
-        allocate_test();
-        allocate_big_twice_test();
-    }
 }
-*/
