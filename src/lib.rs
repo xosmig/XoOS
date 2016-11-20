@@ -14,12 +14,10 @@
 
 extern crate rlibc;
 
-#[macro_use]
-pub mod macro_utility;
-#[macro_use]
-pub mod fmt;
-#[macro_use]
-pub mod interrupts;
+#[macro_use] pub mod macro_utility;
+#[macro_use] pub mod fmt;
+#[cfg(os_test)] #[macro_use] pub mod tests;
+#[macro_use] pub mod interrupts;
 
 pub mod prelude;
 pub mod utility;
@@ -30,7 +28,6 @@ pub mod vga;
 pub mod pit;
 pub mod boot_info;
 pub mod mem;
-#[cfg(os_test)] pub mod tests;
 
 use fmt::Write;
 use boot_info::MultibootInfo;

@@ -84,8 +84,20 @@ impl BuddyAllocator {
     }
 }
 
+/*
 #[cfg(os_test)]
 pub mod buddy_tests {
+    use ::tests::*;
+    pub struct Tests;
+
+    impl TestSet for Tests {
+        const TESTS: TestsT = &[
+            (&foo, "tests_lib sample1"),
+            (&bar, "tests_lib sample2"),
+        ];
+    }
+
+
     use super::*;
     use ::prelude::*;
 
@@ -183,3 +195,4 @@ pub mod buddy_tests {
         allocate_big_twice_test();
     }
 }
+*/
