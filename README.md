@@ -15,7 +15,7 @@ https://github.com/japaric/xargo#dependencies
    * Available options: gdb, os_test
 * RUSTFLAGS
 
-## usefull targets:
-* build (default)
-* run
-* gdb
+## Useful targets:
+* build &mdash; (default) build debug target
+* run &mdash; build debug target and run it via qemu
+* tests &mdash; run unit tests
