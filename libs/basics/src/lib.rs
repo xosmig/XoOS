@@ -14,7 +14,7 @@
 #[macro_use] pub mod utility_macro;
 #[macro_use] pub mod fmt;
 
-mod prelude;
+pub mod prelude;
 #[cfg(os_test)] pub mod test_lib;
 pub mod utility;
 pub mod ioports;

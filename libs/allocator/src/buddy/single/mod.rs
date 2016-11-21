@@ -3,14 +3,14 @@ prelude!();
 
 mod entry;
 
-use ::mem::paging::PAGE_SIZE;
-use ::mem::{ get_mut_ptr, memory_map };
-use ::utility::{ round_up, round_down, log2_floor };
+use ::basics::mem::paging::PAGE_SIZE;
+use ::basics::mem::{ get_mut_ptr, memory_map };
+use ::basics::utility::{ round_up, round_down, log2_floor };
 use ::core::slice;
 use ::core::cmp::{min, max};
 
 use self::entry::*;
-use super::super::inplace_list::*;
+use ::basics::mem::inplace_list::*;
 
 
 const MIN_SIZE: usize = PAGE_SIZE * 10;
@@ -84,7 +84,7 @@ impl Single {
                         node.as_mut().set_occupied();
                         self.lists[node.as_ref().level()].remove(node);
                     }
-                    return Some(unsafe { NonZero::new(self.node_to_ptr(num)) });
+                    return Some(NonZero::new(self.node_to_ptr(num)));
                 }
             }
         }

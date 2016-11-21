@@ -1,9 +1,9 @@
 
 prelude!();
 
-use mem::inplace_list::{ self, InplaceList };
-use mem::buddy::*;
-use mem::paging::PAGE_SIZE;
+use ::basics::mem::inplace_list::{ self, InplaceList };
+use ::buddy::*;
+use ::basics::mem::paging::PAGE_SIZE;
 use core::marker::PhantomData;
 use core::cmp::Eq;
 
@@ -214,6 +214,7 @@ impl<'a> SlabAllocator<'a> {
     }
 }
 
+/*
 
 #[cfg(os_test)]
 pub mod slab_tests {
@@ -259,4 +260,5 @@ pub mod slab_tests {
         allocate();
     }
 }
+*/
 

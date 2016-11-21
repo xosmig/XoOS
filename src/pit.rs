@@ -4,7 +4,8 @@
 //! Programmable Interval Timer
 //! generates interrupts
 
-use ::prelude::*;
+prelude!();
+
 use ::basics::ioports::*;
 use ::interrupts::pic;
 

@@ -7,6 +7,7 @@
 #![feature(shared)]
 #![feature(nonzero)]
 #![feature(allocator)]
+#![feature(alloc, collections)]
 
 #![allocator]
 
@@ -17,8 +18,11 @@
 extern crate rlibc;
 
 /// All code which is necessary to write allocator
-#[macro_use]
-extern crate basics;
+#[macro_use] extern crate basics;
+extern crate allocator;
+extern crate alloc;
+#[macro_use] extern crate collections;
+
 
 //extern crate allocator;
 
@@ -28,29 +32,28 @@ mod prelude;
 pub mod error_handling;
 pub mod vga;
 pub mod pit;
-//pub mod mem;
 
-//use ::prelude::light::*;
-//use boot_info::MultibootInfo;
-//use mem::memory_map::MemoryMap;
+use ::prelude::light::*;
+use ::basics::boot_info::MultibootInfo;
 
 
 #[no_mangle]
 pub unsafe extern fn rust_start(info_ptr: usize) {
-//    #[cfg(gdb)] gdb_start();
-//    ini(info_ptr);
-//
-//    #[cfg(os_test)] tests::test_all();
-//    #[cfg(not(os_test))] main();
-//
-//    end();
+    #[cfg(gdb)] gdb_start();
+    ini(info_ptr);
+
+    #[cfg(os_test)] test_lib::test_all();
+    #[cfg(not(os_test))] main();
+
+    end();
 }
 
 fn main() {
+    let box5 = Box::new(5);
+    println!("{}", *box5);
 }
 
 
-/*
 #[cfg(gdb)]
 fn gdb_start() {
     let mut gdb_wait = true;
@@ -64,7 +67,7 @@ unsafe fn ini(info_ptr: usize) {
 
     interrupts::init_default();
     mem::paging::init_default();
-    mem::buddy::BuddyAllocator::init_default(&mmap);
+    allocator::buddy::BuddyAllocator::init_default(&mmap);
 }
 
 
@@ -75,4 +78,3 @@ fn end() {
     vga::print(OK_MESSAGE.as_bytes());
     loop{}
 }
-*/

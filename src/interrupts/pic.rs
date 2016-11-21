@@ -1,4 +1,6 @@
-use ::prelude::*;
+
+prelude!();
+
 use ::basics::ioports::*;
 use ::basics::utility::bit;
 

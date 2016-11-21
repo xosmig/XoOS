@@ -6,10 +6,10 @@ fn test_sets() {
     //run_test_set::<path_to_your_tests_module::Tests>();
     run_test_set::<::test_lib::sample_mod::sample_mod_tests::Tests>();
     run_test_set::<mem::paging::paging_tests::Tests>();
-    run_test_set::<mem::buddy::buddy_tests::Tests>();
     run_test_set::<::ioports::ioports_tests::Tests>();
     run_test_set::<utility::utility_tests::Tests>();
-//    run_test_set::<mem::slab::slab_tests::Tests>();
+    //    run_test_set::<mem::buddy::buddy_tests::Tests>();
+    //    run_test_set::<mem::slab::slab_tests::Tests>();
 //    run_test_set::<mem::general_allocator::general_allocator_tests::Tests>();
 }
 

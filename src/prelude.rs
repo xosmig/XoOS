@@ -12,7 +12,7 @@ pub mod light {
         // mem is already imported
         // fmt is already imported
     };
-
+    pub use ::alloc::boxed::Box;
     pub use ::basics::fmt::Write;  // for println!(...)
     //pub use ::fmt::*;  // for println!(...)
     pub use ::core::nonzero::NonZero;

@@ -12,8 +12,10 @@ macro_rules! prelude {
 macro_rules! generate(
     ($val: expr; $len: expr) => (
         {
-            let mut array: [_; $len] = unsafe { ::mem::uninitialized() };
+            #[allow(unused_unsafe)]
+            let mut array: [_; $len] = unsafe { ::core::mem::uninitialized() };
             for i in array.iter_mut() {
+                #[allow(unused_unsafe)]
                 unsafe { ::core::ptr::write(i, $val); }
             }
             array

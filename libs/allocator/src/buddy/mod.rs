@@ -4,9 +4,9 @@ prelude!();
 mod single;
 
 use ::core::ops::Deref;
-use ::mem::paging::PAGE_SIZE;
-use ::utility::log2_ceil;
-use ::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
+use ::basics::mem::paging::PAGE_SIZE;
+use ::basics::utility::log2_ceil;
+use ::basics::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
 use self::single::Single;
 
 
@@ -62,7 +62,7 @@ impl BuddyAllocator {
 
     /// It's in terms of races.
     pub unsafe fn get_instance() -> &'static mut Self {
-        unsafe { &mut INSTANCE }
+        &mut INSTANCE
     }
 
     pub fn allocate_level(&mut self, level: usize) -> Option<BuddyBox> {
@@ -76,7 +76,7 @@ impl BuddyAllocator {
     pub unsafe fn allocate_level_raw(&mut self, level: usize) -> Option<BuddyRaw> {
         let mut num = 0;
         while let Some(ptr) = self.singles[num] {
-            if let Some(address) = unsafe{ (**ptr).allocate(level) } {
+            if let Some(address) = (**ptr).allocate(level) {
                 return Some(BuddyRaw { pointer: address, single_num: num });
             }
             num += 1;
@@ -125,6 +125,7 @@ impl BuddyAllocator {
     }
 }
 
+/*
 
 #[cfg(os_test)]
 pub mod buddy_tests {
@@ -223,3 +224,4 @@ pub mod buddy_tests {
         None
     }
 }
+*/
