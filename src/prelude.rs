@@ -3,6 +3,7 @@
 
 pub mod light {
     pub use ::basics::*;
+    pub use ::basics::test_lib::TestSet;
     pub use ::core::{
         nonzero,
         ptr,

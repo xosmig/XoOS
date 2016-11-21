@@ -3,12 +3,10 @@
 macro_rules! tests_module {
     ($name: expr, $( $test: ident ),* ) => {
         prelude!();
-        use ::test_lib::*;
         pub struct Tests;
-
         impl TestSet for Tests {
-            const NAME: NameT = $name;
-            const TESTS: TestsT = &[
+            const NAME: test_lib::NameT = $name;
+            const TESTS: test_lib::TestsT = &[
                 $( (&$test, stringify!($test)), )*
             ];
         }

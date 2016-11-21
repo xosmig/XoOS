@@ -96,14 +96,6 @@ impl BuddyAllocator {
                 break;
             }
         }
-
-//        let mut num = 0;
-//        while let Some(ptr) = self.singles[num] {
-//            if let Some(address) = unsafe{ (**ptr).allocate(level) } {
-//                return Some(BuddyRaw { pointer: address, single_num: num });
-//            }
-//            num += 1;
-//        }
     }
 
     pub unsafe fn allocate_raw(&mut self, size: usize) -> Option<BuddyRaw> {
@@ -125,7 +117,6 @@ impl BuddyAllocator {
     }
 }
 
-/*
 
 #[cfg(os_test)]
 pub mod buddy_tests {
@@ -224,4 +215,3 @@ pub mod buddy_tests {
         None
     }
 }
-*/

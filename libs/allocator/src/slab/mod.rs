@@ -5,7 +5,6 @@ use ::basics::mem::inplace_list::{ self, InplaceList };
 use ::buddy::*;
 use ::basics::mem::paging::PAGE_SIZE;
 use core::marker::PhantomData;
-use core::cmp::Eq;
 
 type Node = inplace_list::Node<()>;
 type PageNode<'a> = inplace_list::Node<Page<'a>>;
@@ -137,12 +136,10 @@ impl<'a> SlabAllocator<'a> {
         if page_node.as_ref().allocated() == 0 && *page_node != *self.pages.last().unwrap() {
             // deallocate the page
             let page_start = page_node.as_ref().ptr();
-            let mut ptr = unsafe { page_start.offset(size_of::<PageNode>() as isize) };
+            let mut ptr = page_start.offset(size_of::<PageNode>() as isize);
             while (ptr as usize) + self.frame_size <= (page_start as usize) + PAGE_SIZE {
-                unsafe {
-                    self.frames.remove(&mut *(ptr as *mut Node));
-                    ptr = ptr.offset(self.frame_size as isize);
-                }
+                self.frames.remove(&mut *(ptr as *mut Node));
+                ptr = ptr.offset(self.frame_size as isize);
             }
         }
     }
@@ -214,13 +211,12 @@ impl<'a> SlabAllocator<'a> {
     }
 }
 
-/*
 
 #[cfg(os_test)]
 pub mod slab_tests {
     use super::*;
     use super::{ Node, PageNode };
-    use mem::paging::PAGE_SIZE;
+    use ::basics::mem::paging::PAGE_SIZE;
 
     tests_module!("slab_allocator",
         min_frame_at_least_node_size,
@@ -260,5 +256,4 @@ pub mod slab_tests {
         allocate();
     }
 }
-*/
 

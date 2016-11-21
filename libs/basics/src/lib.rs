@@ -4,7 +4,6 @@
 #![feature(const_fn)]
 #![feature(shared)]
 #![feature(nonzero)]
-#![feature(step_by)]
 
 #![no_std]
 

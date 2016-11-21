@@ -42,7 +42,7 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
     #[cfg(gdb)] gdb_start();
     ini(info_ptr);
 
-    #[cfg(os_test)] test_lib::test_all();
+    #[cfg(os_test)] test_all();
     #[cfg(not(os_test))] main();
 
     end();
@@ -51,6 +51,28 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
 fn main() {
     let box5 = Box::new(5);
     println!("{}", *box5);
+}
+
+
+fn test_all() {
+    use ::basics::test_lib::run_test_set;
+
+    println!("");
+    println!("Run all tests:");
+    println!("");
+
+    // run_test_set::<path_to_your_tests_module::Tests>();
+    run_test_set::<test_lib::sample_mod::sample_mod_tests::Tests>();
+    run_test_set::<mem::paging::paging_tests::Tests>();
+    run_test_set::<ioports::ioports_tests::Tests>();
+    run_test_set::<utility::utility_tests::Tests>();
+    run_test_set::<allocator::buddy::buddy_tests::Tests>();
+    run_test_set::<allocator::slab::slab_tests::Tests>();
+    run_test_set::<allocator::allocator_tests::Tests>();
+
+    println!("");
+    println!("all tests passed [^_^]");
+    println!("");
 }
 
 

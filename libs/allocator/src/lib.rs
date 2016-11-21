@@ -97,13 +97,11 @@ pub extern fn __rust_usable_size(size: usize, _align: usize) -> usize {
     size  // FIXME: In fact, it is greater
 }
 
-/*
 #[cfg(os_test)]
-pub mod general_allocator_tests {
+pub mod allocator_tests {
     use super::*;
     use super::{ SLABS, get_slub_num };
-    use mem::slab;
-    tests_module!("general_allocator",
+    tests_module!("allocator",
         get_slub_num_test,
         check_slab_sizes,
         allocate_simple,
@@ -156,4 +154,3 @@ pub mod general_allocator_tests {
         allocate();
     }
 }
-*/
