@@ -1,11 +1,13 @@
+
+prelude!();
+
 use ::vga;
-use ::prelude::*;
 use super::pic::{PIC_1, PIC_2};
 
 mod item;
 pub use self::item::*;
-mod ptr;
-pub use self::ptr::*;
+mod idt_ptr;
+pub use self::idt_ptr::*;
 
 extern "C" {
     fn interrupt0();

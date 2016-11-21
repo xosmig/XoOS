@@ -23,19 +23,18 @@ extern crate allocator;
 extern crate alloc;
 #[macro_use] extern crate collections;
 
-
-//extern crate allocator;
+pub use ::basics::*;
+pub use core::{ cmp, ops, ptr };
+pub use ::alloc::boxed;
 
 #[macro_use] pub mod interrupts;
-
 mod prelude;
 pub mod error_handling;
 pub mod vga;
 pub mod pit;
 
-use ::prelude::light::*;
-use ::basics::boot_info::MultibootInfo;
-
+use ::boot_info::MultibootInfo;
+use ::fmt::Write;
 
 #[no_mangle]
 pub unsafe extern fn rust_start(info_ptr: usize) {
@@ -49,11 +48,11 @@ pub unsafe extern fn rust_start(info_ptr: usize) {
 }
 
 fn main() {
-    let box5 = Box::new(5);
-    println!("{}", *box5);
+
 }
 
 
+#[cfg(os_test)]
 fn test_all() {
     use ::basics::test_lib::run_test_set;
 
@@ -81,7 +80,6 @@ fn gdb_start() {
     let mut gdb_wait = true;
     while unsafe { core::ptr::read_volatile(&gdb_wait) } {  }
 }
-
 
 unsafe fn ini(info_ptr: usize) {
     let info = MultibootInfo::load(info_ptr);

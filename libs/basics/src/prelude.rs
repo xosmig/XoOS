@@ -5,7 +5,7 @@ pub mod light {
     pub use ::fmt;
     pub use ::serial;
     pub use ::mem;
-    pub use ::test_lib::{ self, TestSet };
+    #[cfg(os_test)] pub use ::test_lib::{ self, TestSet };
     pub use ::core::{
         nonzero,
         ptr,

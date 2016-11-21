@@ -4,9 +4,9 @@ prelude!();
 mod single;
 
 use ::core::ops::Deref;
-use ::basics::mem::paging::PAGE_SIZE;
-use ::basics::utility::log2_ceil;
-use ::basics::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
+use ::mem::paging::PAGE_SIZE;
+use ::utility::log2_ceil;
+use ::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
 use self::single::Single;
 
 

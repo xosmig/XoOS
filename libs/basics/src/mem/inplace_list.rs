@@ -76,7 +76,7 @@ impl<T> InplaceList<T> {
         self.first = Some(Shared::new(node));
         // note: next is already updated (former self.first)
         if let Some(second) = node.next {
-            unsafe { (**second).prev = self.first };
+            (**second).prev = self.first;
         }
 
         debug_assert!(match node.next { Some(shared) => *shared != node, None => true });

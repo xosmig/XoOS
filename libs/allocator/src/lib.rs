@@ -15,10 +15,10 @@
 
 #[macro_use] extern crate basics;
 
-use ::prelude::light::*;
-use ::basics::utility;
+pub use ::basics::*;
+use core::{ ptr, cmp };
 
-pub mod prelude;
+mod prelude;
 pub mod buddy;
 pub mod slab;
 
@@ -99,7 +99,7 @@ pub extern fn __rust_usable_size(size: usize, _align: usize) -> usize {
 
 #[cfg(os_test)]
 pub mod allocator_tests {
-    use super::*;
+    use super::{ slab, __rust_allocate, __rust_deallocate };
     use super::{ SLABS, get_slub_num };
     tests_module!("allocator",
         get_slub_num_test,

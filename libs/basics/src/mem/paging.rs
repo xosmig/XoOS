@@ -25,8 +25,10 @@ pub const LAST_LEVEL: usize = 4;
 const PRESENT: usize =         1 << 0;
 const WRITABLE: usize =        1 << 1;
 const USER_ACCESSIBLE: usize = 1 << 2;
+#[allow(dead_code)]
 const ACCESSED: usize =        1 << 5;
 const HUGE_PAGE: usize =       1 << 7;
+#[allow(dead_code)]
 const NO_EXECUTE: usize =      1 << 63;
 
 #[repr(C)]

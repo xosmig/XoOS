@@ -1,9 +1,9 @@
 
 prelude!();
 
-use ::basics::mem::inplace_list::{ self, InplaceList };
+use ::mem::inplace_list::{ self, InplaceList };
 use ::buddy::*;
-use ::basics::mem::paging::PAGE_SIZE;
+use ::mem::paging::PAGE_SIZE;
 use core::marker::PhantomData;
 
 type Node = inplace_list::Node<()>;
@@ -216,7 +216,7 @@ impl<'a> SlabAllocator<'a> {
 pub mod slab_tests {
     use super::*;
     use super::{ Node, PageNode };
-    use ::basics::mem::paging::PAGE_SIZE;
+    use ::mem::paging::PAGE_SIZE;
 
     tests_module!("slab_allocator",
         min_frame_at_least_node_size,

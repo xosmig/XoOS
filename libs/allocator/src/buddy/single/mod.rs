@@ -3,14 +3,14 @@ prelude!();
 
 mod entry;
 
-use ::basics::mem::paging::PAGE_SIZE;
-use ::basics::mem::{ get_mut_ptr, memory_map };
-use ::basics::utility::{ round_up, round_down, log2_floor };
+use ::mem::paging::PAGE_SIZE;
+use ::mem::{ get_mut_ptr, memory_map };
+use ::utility::{ round_up, round_down, log2_floor };
 use ::core::slice;
 use ::core::cmp::{min, max};
 
 use self::entry::*;
-use ::basics::mem::inplace_list::*;
+use ::mem::inplace_list::*;
 
 
 const MIN_SIZE: usize = PAGE_SIZE * 10;

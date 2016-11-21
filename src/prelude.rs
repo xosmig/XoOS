@@ -2,8 +2,11 @@
 #![allow(private_in_public)]
 
 pub mod light {
-    pub use ::basics::*;
-    pub use ::basics::test_lib::TestSet;
+    pub use ::fmt;
+    pub use ::serial;
+    pub use ::mem;
+    #[cfg(os_test)] pub use ::basics::test_lib::{ self, TestSet };
+    pub use ::boxed::Box;
     pub use ::core::{
         nonzero,
         ptr,
@@ -13,8 +16,8 @@ pub mod light {
         // mem is already imported
         // fmt is already imported
     };
-    pub use ::alloc::boxed::Box;
-    pub use ::basics::fmt::Write;  // for println!(...)
+
+    pub use ::fmt::Write;  // for println!(...)
     //pub use ::fmt::*;  // for println!(...)
     pub use ::core::nonzero::NonZero;
     pub use ::core::ptr::Shared;
@@ -23,4 +26,5 @@ pub mod light {
 
 pub use self::light::*;
 
+pub use ::utility;
 pub use core;
