@@ -1,4 +1,6 @@
 
+prelude!();
+
 pub struct Entry {
     num: u32,
     level: u16,

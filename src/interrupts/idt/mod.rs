@@ -1,5 +1,5 @@
 use ::vga;
-use ::fmt::Write;
+use ::prelude::*;
 use super::pic::{PIC_1, PIC_2};
 
 mod item;

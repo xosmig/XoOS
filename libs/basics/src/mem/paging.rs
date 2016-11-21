@@ -1,5 +1,5 @@
 
-#![allow(dead_code)]    // FIXME
+prelude!();
 
 use ::core::ops::{Index, IndexMut};
 

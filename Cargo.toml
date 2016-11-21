@@ -6,6 +6,13 @@ authors = ["Andrey Tonkikh <xosmig@gmail.com>"]
 [dependencies]
 rlibc = "1.0.0" # memcpy, memset, etc. Required for libc.
 
+
+[dependencies.allocator]
+path = "libs/allocator"
+[dependencies.basics]
+path = "libs/basics"
+
+
 [lib]
 crate-type = ["staticlib"]
 

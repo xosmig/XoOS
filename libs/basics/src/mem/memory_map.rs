@@ -1,5 +1,6 @@
 
-use ::prelude::*;
+prelude!();
+
 use fmt::{Formatter, Debug};
 
 #[allow(improper_ctypes)]

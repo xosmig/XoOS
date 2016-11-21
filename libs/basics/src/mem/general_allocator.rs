@@ -1,10 +1,8 @@
 
-use ::prelude::*;
+prelude!();
 
-use super::{ slab, buddy };
-use super::slab::SlabAllocator;
-use super::buddy::{ BuddyAllocator, BuddyRaw };
-use super::paging::{ PAGE_SIZE, PAGE_SIZE_POWER };
+use super::slab::{ self, SlabAllocator };
+use super::buddy::{ BuddyAllocator };
 
 const SLAB_CNT: usize = 8;
 static mut SLABS: [SlabAllocator<'static>; SLAB_CNT] = unsafe {

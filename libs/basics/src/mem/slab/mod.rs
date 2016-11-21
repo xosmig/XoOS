@@ -1,5 +1,6 @@
 
-use ::prelude::*;
+prelude!();
+
 use mem::inplace_list::{ self, InplaceList };
 use mem::buddy::*;
 use mem::paging::PAGE_SIZE;

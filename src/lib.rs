@@ -1,11 +1,11 @@
-#![feature(lang_items)]
+
+#![feature(associated_consts)]
 #![feature(asm)]
+#![feature(lang_items)]
 #![feature(const_fn)]
 #![feature(stmt_expr_attributes)]
 #![feature(shared)]
 #![feature(nonzero)]
-#![feature(step_by)]
-#![feature(associated_consts)]
 #![feature(allocator)]
 
 #![allocator]
@@ -16,42 +16,41 @@
 
 extern crate rlibc;
 
-#[macro_use] pub mod utility_macro;
-#[cfg(os_test)] #[macro_use] pub mod tests_macro;
-#[macro_use] pub mod fmt;
-#[cfg(os_test)] pub mod tests;
+/// All code which is necessary to write allocator
+#[macro_use]
+extern crate basics;
+
+//extern crate allocator;
+
 #[macro_use] pub mod interrupts;
 
-pub mod prelude;
-pub mod utility;
-pub mod serial;
+mod prelude;
 pub mod error_handling;
-pub mod ioports;
 pub mod vga;
 pub mod pit;
-pub mod boot_info;
-pub mod mem;
+//pub mod mem;
 
-use ::prelude::without_core::*;
-use boot_info::MultibootInfo;
-use mem::memory_map::MemoryMap;
+//use ::prelude::light::*;
+//use boot_info::MultibootInfo;
+//use mem::memory_map::MemoryMap;
 
 
 #[no_mangle]
 pub unsafe extern fn rust_start(info_ptr: usize) {
-    #[cfg(gdb)] gdb_start();
-    ini(info_ptr);
-
-    #[cfg(os_test)] tests::test_all();
-    #[cfg(not(os_test))] main();
-
-    end();
+//    #[cfg(gdb)] gdb_start();
+//    ini(info_ptr);
+//
+//    #[cfg(os_test)] tests::test_all();
+//    #[cfg(not(os_test))] main();
+//
+//    end();
 }
 
 fn main() {
 }
 
 
+/*
 #[cfg(gdb)]
 fn gdb_start() {
     let mut gdb_wait = true;
@@ -76,3 +75,4 @@ fn end() {
     vga::print(OK_MESSAGE.as_bytes());
     loop{}
 }
+*/

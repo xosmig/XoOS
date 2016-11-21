@@ -1,6 +1,5 @@
 use ::vga;
-use ::core::fmt;
-use ::fmt::Write;
+use ::prelude::*;
 
 /// The entry point on panic.
 #[lang = "panic_fmt"]

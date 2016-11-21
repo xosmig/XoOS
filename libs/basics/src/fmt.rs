@@ -53,16 +53,18 @@ impl<'a> Write for Buffer<'a> {
 }
 
 /// prints data to the serial port
+#[macro_export]
 macro_rules! print {
     ($fmt: expr) => (
-        write!(::serial::Serial::get(), $fmt).expect("`print!` or `println` failed")
+        write!(serial::Serial::get(), $fmt).expect("`print!` or `println` failed")
     );
     ($fmt: expr, $( $arg: expr ),* ) => (
-        write!(::serial::Serial::get(), $fmt $( ,$arg )* ).expect("`print!` or `println!` failed")
+        write!(serial::Serial::get(), $fmt $( ,$arg )* ).expect("`print!` or `println!` failed")
     );
 }
 
 /// prints data to the serial port
+#[macro_export]
 macro_rules! println {
     ($fmt: expr) => (
         print!(concat!($fmt, "\n"))
@@ -75,19 +77,21 @@ macro_rules! println {
 /// gets a byte array for buffer as the first parameter
 /// and writes formatted data into it
 /// returns pair: (???, the number of written bytes)
+#[macro_export]
 macro_rules! format {
     ($data: expr, $fmt: expr) => ({
-        let mut buf = ::fmt::Buffer::new(&mut $data);
+        let mut buf = fmt::Buffer::new(&mut $data);
         write!(buf, $fmt).expect("`format!` failed");
         buf.len()
     });
     ($data: expr, $fmt: expr, $( $arg: expr ),*) => ({
-        let mut buf = ::fmt::Buffer::new(&mut $data);
+        let mut buf = fmt::Buffer::new(&mut $data);
         write!(buf, $fmt $( ,$arg )*).expect("`format!` failed");
         buf.len()
     });
 }
 
+/*
 #[cfg(os_test)]
 pub mod fmt_tests {
     use super::Buffer;
@@ -122,3 +126,4 @@ pub mod fmt_tests {
         assert!(data.starts_with(b"0x75BCD15"));
     }
 }
+*/

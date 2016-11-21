@@ -10,7 +10,6 @@ pub mod general_allocator;
 
 pub use ::core::mem::*;
 
-use self::paging::PAGE_SIZE;
 use self::paging::MEMORY_START;
 
 fn get_mut_ptr<T>(phys_address: usize) -> *mut T {

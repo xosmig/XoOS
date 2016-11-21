@@ -4,7 +4,8 @@
 //! Programmable Interval Timer
 //! generates interrupts
 
-use ::ioports::*;
+use ::prelude::*;
+use ::basics::ioports::*;
 use ::interrupts::pic;
 
 static mut COMMAND_PORT: IOPort<(), u8> = IOPort::new(0x43);

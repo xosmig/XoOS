@@ -1,5 +1,6 @@
-use ::ioports::*;
-use ::utility::bit;
+use ::prelude::*;
+use ::basics::ioports::*;
+use ::basics::utility::bit;
 
 pub struct Pic {
     command: IOPort<(), u8>,

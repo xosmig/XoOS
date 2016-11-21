@@ -1,7 +1,8 @@
 
+prelude!();
+
 mod entry;
 
-use ::prelude::*;
 use ::mem::paging::PAGE_SIZE;
 use ::mem::{ get_mut_ptr, memory_map };
 use ::utility::{ round_up, round_down, log2_floor };

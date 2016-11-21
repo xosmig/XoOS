@@ -1,5 +1,5 @@
 
-use ::core::ptr::{ self, Shared };
+prelude!();
 
 pub struct Node<T> {
     next: Option<Shared<Node<T>>>,

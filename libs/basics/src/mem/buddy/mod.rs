@@ -1,7 +1,8 @@
 
+prelude!();
+
 mod single;
 
-use ::prelude::*;
 use ::core::ops::Deref;
 use ::mem::paging::PAGE_SIZE;
 use ::utility::log2_ceil;

@@ -1,4 +1,6 @@
 
+prelude!();
+
 use ::utility::*;
 use ::mem::memory_map::{MemoryMap, MemoryMapPtr};
 

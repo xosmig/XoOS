@@ -1,8 +1,9 @@
 
+#[macro_export]
 macro_rules! tests_module {
     ($name: expr, $( $test: ident ),* ) => {
-        use ::prelude::*;
-        use ::tests::*;
+        prelude!();
+        use ::test_lib::*;
         pub struct Tests;
 
         impl TestSet for Tests {
