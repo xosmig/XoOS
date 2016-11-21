@@ -94,9 +94,7 @@ impl<'a> SlabAllocator<'a> {
 
     /// Same as `new_unchecked`, but checks if `frame_size` is incorrect.
     pub fn new(frame_size: usize) -> Self {
-        assert!(frame_size <= MAX_FRAME_SIZE);
-        assert!(frame_size >= MIN_FRAME_SIZE);
-        assert!(frame_size % 8 == 0);
+        Self::check_size(frame_size);
 
         unsafe { Self::new_unchecked(frame_size) }
     }
@@ -146,6 +144,23 @@ impl<'a> SlabAllocator<'a> {
                 }
             }
         }
+    }
+
+    /// Deallocates memory without a reference to its allocator
+    pub unsafe fn deallocate_unknown(ptr: *mut u8) {
+        let page_node: &mut PageNode<'a> = Self::get_page_node(ptr);
+        page_node.as_mut().get_allocator().deallocate(ptr);
+    }
+
+    /// Necessary to check size of slab allocator which was created by call of `new_unchecked`
+    pub fn check_correctness(&self) {
+        Self::check_size(self.frame_size)
+    }
+
+    fn check_size(frame_size: usize) {
+        assert!(frame_size <= MAX_FRAME_SIZE);
+        assert!(frame_size >= MIN_FRAME_SIZE);
+        assert!(frame_size % 8 == 0);
     }
 
     fn allocate_page(&mut self) -> Option<()> {

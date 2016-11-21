@@ -36,6 +36,7 @@ use ::prelude::without_core::*;
 use boot_info::MultibootInfo;
 use mem::memory_map::MemoryMap;
 
+
 #[no_mangle]
 pub unsafe extern fn rust_start(info_ptr: usize) {
     #[cfg(gdb)] gdb_start();

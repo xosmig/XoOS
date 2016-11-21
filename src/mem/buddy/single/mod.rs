@@ -21,6 +21,7 @@ pub struct Single {
     height: usize,
     nodes: &'static mut [Node<Entry>],
     first_page: *mut u8,
+    length: usize,
 }
 
 impl Single {
@@ -32,35 +33,36 @@ impl Single {
         }
 
         // the number of pages
-        let cnt = (end - begin - size_of::<Single>()) / (PAGE_SIZE + size_of::<Node<Entry>>());
-        let height = log2_floor(cnt) + 1;
+        let pages_cnt = (end - begin - size_of::<Single>()) / (PAGE_SIZE + size_of::<Node<Entry>>());
+        let height = log2_floor(pages_cnt) + 1;
         debug_assert!(height < MAX_HEIGHT);
-        debug_assert!(cnt >= 3);
+        debug_assert!(pages_cnt >= 3);
 
         let first_node: *mut Node<Entry> = get_mut_ptr(begin + size_of::<Single>());
-        let first_page: *mut u8 = get_mut_ptr(end - PAGE_SIZE * cnt);
-        debug_assert!(first_node.offset(cnt as isize) as usize <= first_page as usize);
+        let first_page: *mut u8 = get_mut_ptr(end - PAGE_SIZE * pages_cnt);
+        debug_assert!(first_node.offset(pages_cnt as isize) as usize <= first_page as usize);
 
         ptr::write(
             get_mut_ptr(begin),
             Single {
                 lists: generate![InplaceList::new(); MAX_HEIGHT],
                 height: height,
-                nodes: slice::from_raw_parts_mut(first_node, cnt),
-                first_page: first_page
+                nodes: slice::from_raw_parts_mut(first_node, pages_cnt),
+                first_page: first_page,
+                length: pages_cnt * PAGE_SIZE,
             }
         );
         let mut it: &mut Single = &mut*(get_mut_ptr(begin));
 
         // initialize nodes
-        for i in 0..cnt {
+        for i in 0..pages_cnt {
             let ptr = first_node.offset(i as isize);
             ptr::write(ptr, Node::new(Entry::new(i)));
             it.lists[0].insert(&mut*ptr);
         }
 
         for i in 0..height {
-            for i in (0..cnt).step_by(1 << (i + 1)) {
+            for i in (0..pages_cnt).step_by(1 << (i + 1)) {
                 if it.nodes[i].as_ref().is_free() {
                     it.go_up_once(i);
                 }
@@ -100,6 +102,12 @@ impl Single {
         while let Some(next) = self.go_up_once(num) {
             num = next;
         }
+    }
+
+    pub fn contains_addr(&self, ptr: *mut u8) -> bool {
+        let addr = ptr as usize;
+        let begin = self.first_page as usize;
+        addr >= begin && addr <= begin + self.length
     }
 
     /// Returns None if it can't be moved on the next level.

@@ -84,6 +84,27 @@ impl BuddyAllocator {
         None
     }
 
+    pub unsafe fn deallocate_unknown(&mut self, ptr: *mut u8) {
+        assert!(ptr as usize != 0);
+        for mb_single in self.singles.iter_mut() {
+            if let Some(shared_single) = *mb_single {
+                if (**shared_single).contains_addr(ptr) {
+                    (**shared_single).deallocate(NonZero::new(ptr));
+                }
+            } else {
+                break;
+            }
+        }
+
+//        let mut num = 0;
+//        while let Some(ptr) = self.singles[num] {
+//            if let Some(address) = unsafe{ (**ptr).allocate(level) } {
+//                return Some(BuddyRaw { pointer: address, single_num: num });
+//            }
+//            num += 1;
+//        }
+    }
+
     pub unsafe fn allocate_raw(&mut self, size: usize) -> Option<BuddyRaw> {
         self.allocate_level_raw(Self::size_to_level(size))
     }

@@ -7,6 +7,8 @@ pub mod without_core {
         nonzero,
         ptr,
         marker,
+        cmp,
+        ops,
         // mem is already imported
         // fmt is already imported
     };
