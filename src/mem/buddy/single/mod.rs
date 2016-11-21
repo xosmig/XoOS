@@ -73,7 +73,7 @@ impl Single {
     pub fn allocate(&mut self, req_level: usize) -> Option<NonZero<*mut u8>> {
         unsafe {
             for lvl in req_level..self.height {
-                if let Some(num) = self.lists[lvl].first().map(|x| x.as_ref().num()) {
+                if let Some(num) = self.lists[lvl].last().map(|x| x.as_ref().num()) {
                     debug_assert!(self.nodes[num].as_ref().is_free());
                     self.down_to_level(num, req_level);
                     {

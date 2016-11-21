@@ -4,19 +4,25 @@ use mem::inplace_list::{ self, InplaceList };
 use mem::buddy::*;
 use mem::paging::PAGE_SIZE;
 use core::marker::PhantomData;
+use core::cmp::Eq;
 
 type Node = inplace_list::Node<()>;
 type PageNode<'a> = inplace_list::Node<Page<'a>>;
 
+/// Meta information about allocated page.
+/// Lifetime parameter is equal to its slab allocator lifetime.
 struct Page<'a> {
+    /// Ownership over the memory.
     bbox: BuddyBox,
     /// The number of allocated frames on this page.
     cnt: usize,
+    /// A slab allocator, which owns this page.
     allocator: Shared<SlabAllocator<'a>>,
     phantom: PhantomData<&'a u8>
 }
 
 impl<'a> Page<'a> {
+    /// Allocates one page in BuddyAllocator.
     fn allocate(allocator: &'a mut SlabAllocator) -> Option<Page<'a>> {
         Some(Page {
             bbox: tryo!(unsafe { BuddyAllocator::get_instance().allocate_level(0) }),
@@ -26,23 +32,28 @@ impl<'a> Page<'a> {
         })
     }
 
+    /// The number of allocated frames on this page.
     fn allocated(&self) -> usize {
         self.cnt
     }
 
+    /// Increase the counter of allocated frames on this page.
     fn inc(&mut self) {
         self.cnt += 1;
     }
 
+    /// Decrease the counter of allocated frames on this page.
     fn dec(&mut self) {
         debug_assert!(self.cnt != 0);
         self.cnt -= 1;
     }
 
-    fn ptr(&self) -> NonZero<*mut u8> {
-        *self.bbox
+    /// Returns a pointer to the start of the page.
+    fn ptr(&self) -> *mut u8 {
+        **self.bbox
     }
 
+    /// Returns a reference to a slab allocator, which owns this page.
     unsafe fn get_allocator(&mut self) -> &'a mut SlabAllocator {
         &mut **self.allocator
     }
@@ -55,6 +66,8 @@ pub const MIN_FRAME_SIZE: usize = 16;
 /// 2 * MAX_FRAME_SIZE should be not more than amount of free space in page
 pub const MAX_FRAME_SIZE: usize = PAGE_SIZE / 2 - 16;
 
+/// In order to minimize BuddyAllocator calls, it never frees its last allocated page.
+/// So, after the first allocation, there is always at least one page in allocator.
 pub struct SlabAllocator<'a> {
     frame_size: usize,
     frames: InplaceList<()>,
@@ -62,7 +75,7 @@ pub struct SlabAllocator<'a> {
     pages: InplaceList<Page<'a>>,
     /// The number of nodes initialized in the first page.
     /// Provides lazy page initialization. It's extremely beneficial in some cases.
-    first_page_initialized: usize,
+    last_page_initialized: usize,
 }
 
 
@@ -75,7 +88,7 @@ impl<'a> SlabAllocator<'a> {
             frame_size: frame_size,
             frames: InplaceList::new(),
             pages: InplaceList::new(),
-            first_page_initialized: usize::max_value(),
+            last_page_initialized: usize::max_value(),
         }
     }
 
@@ -92,7 +105,7 @@ impl<'a> SlabAllocator<'a> {
         // FIXME: avoid reborrow_mut
         let self2 = unsafe { reborrow_mut!(self, Self) };
 
-        if let Some(node) = self.frames.first_mut() {
+        if let Some(node) = self.frames.last_mut() {
             unsafe { self2.frames.remove(node); }
 
             let res = node as *mut Node as *mut u8;
@@ -106,7 +119,7 @@ impl<'a> SlabAllocator<'a> {
             return Some(unsafe { NonZero::new(res) });
         }
 
-        if self.first_page_initialized >= self.frames_per_page() {
+        if self.last_page_initialized >= self.frames_per_page() {
             // we have to allocate new page
             tryo!(self.allocate_page());
         }
@@ -115,15 +128,25 @@ impl<'a> SlabAllocator<'a> {
         self.allocate()  // recursion
     }
 
-    /*pub unsafe fn deallocate(&mut self, ptr: *mut u8) {
-        debug_assert!(ptr != 0);
-        let page_node = Self::get_page_node(ptr);
+    pub unsafe fn deallocate(&mut self, ptr: *mut u8) {
+        debug_assert!((ptr as usize) != 0);
+        let page_node: &mut PageNode<'a> = Self::get_page_node(ptr);
         page_node.as_mut().dec();
-//        if page_node.as_ref().allocated() == 0 {
-//            deallocate_page;
-//        }
         self.add_node(ptr);
-    }*/
+
+        // if the page is empty and it's not the last allocated page
+        if page_node.as_ref().allocated() == 0 && *page_node != *self.pages.last().unwrap() {
+            // deallocate the page
+            let page_start = page_node.as_ref().ptr();
+            let mut ptr = unsafe { page_start.offset(size_of::<PageNode>() as isize) };
+            while (ptr as usize) + self.frame_size <= (page_start as usize) + PAGE_SIZE {
+                unsafe {
+                    self.frames.remove(&mut *(ptr as *mut Node));
+                    ptr = ptr.offset(self.frame_size as isize);
+                }
+            }
+        }
+    }
 
     fn allocate_page(&mut self) -> Option<()> {
         let page: Page<'a> = unsafe {
@@ -132,30 +155,30 @@ impl<'a> SlabAllocator<'a> {
             tryo!(Page::allocate(self2))
         };
 
-        let page_start = *page.ptr();
+        let page_start = page.ptr();
 
         unsafe {
             ptr::write(page_start as *mut PageNode, PageNode::new(page));
             self.pages.insert(&mut *(page_start as *mut PageNode));
         };
 
-        self.first_page_initialized = 0;
+        self.last_page_initialized = 0;
 
-        debug_assert!(self.pages.first().is_some());
+        debug_assert!(self.pages.last().is_some());
         Some(())
     }
 
     fn initialize_node(&mut self) {
-        let page_begin = *self.pages.first_mut().unwrap().as_mut().ptr();
-        let offset = size_of::<PageNode>() + self.frame_size * self.first_page_initialized;
+        let page_begin = self.pages.last_mut().unwrap().as_mut().ptr();
+        let offset = size_of::<PageNode>() + self.frame_size * self.last_page_initialized;
         debug_assert!(offset + self.frame_size <= PAGE_SIZE);
         unsafe {
             let ptr = page_begin.offset(offset as isize);
             self.add_node(ptr);
         }
-        self.first_page_initialized += 1;
+        self.last_page_initialized += 1;
 
-        debug_assert!(self.frames.first_mut().is_some());
+        debug_assert!(self.frames.last_mut().is_some());
 
     }
 
@@ -187,27 +210,37 @@ pub mod slab_tests {
         simple_allocate_test,
     );
 
-    // it is necessary for correct alignment
+    /// It is necessary to fit Node in not-allocated frames.
     fn min_frame_at_least_node_size() {
         assert!(MIN_FRAME_SIZE >= size_of::<Node>());
     }
 
     fn simple_allocate_test() {
-        const N: usize = 100;
+        const N: usize = 200;
         const SIZE: usize = 160;
 
         let mut allocator = SlabAllocator::new(SIZE);
         let mut ptrs = [None; N];
 
-        for i in 0..N {
-            ptrs[i] = allocator.allocate();
-            // allocated objects don't intersect
-            for j in 0..i {
-                let addr1 = *ptrs[j].unwrap() as isize;
-                let addr2 = *ptrs[i].unwrap() as isize;
-                assert!((addr1 - addr2).abs() >= SIZE as isize);
+        let mut allocate = || {
+            for i in 0..N {
+                ptrs[i] = allocator.allocate();
+                // allocated objects don't intersect
+                for j in 0..i {
+                    let addr1 = *ptrs[j].unwrap() as isize;
+                    let addr2 = *ptrs[i].unwrap() as isize;
+                    assert!((addr1 - addr2).abs() >= SIZE as isize);
+                }
             }
-        }
+
+            for i in 0..N {
+                unsafe { allocator.deallocate(*ptrs[i].unwrap()) };
+                ptrs[i] = None;
+            }
+        };
+
+        allocate();
+        allocate();
     }
 }
 

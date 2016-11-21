@@ -7,6 +7,12 @@ pub struct Node<T> {
     object: T,
 }
 
+impl<T> PartialEq<Node<T>> for Node<T> {
+    fn eq(&self, other: &Node<T>) -> bool {
+        (self as *const _) == (other as *const _)
+    }
+}
+
 impl<T> Node<T> {
     /// Creates a `Node` with given object, without left and right pointers.
     pub const fn new(object: T) -> Self {
@@ -21,11 +27,11 @@ impl<T> Node<T> {
         &self.object
     }
 
-    pub fn next(&self) -> Option<&Node<T>> {
+    pub fn prev(&self) -> Option<&Node<T>> {
         self.next.map(|x| unsafe { &**x })
     }
 
-    pub fn next_mut(&mut self) -> Option<&mut Node<T>> {
+    pub fn prev_mut(&mut self) -> Option<&mut Node<T>> {
         self.next.map(|x| unsafe { &mut **x })
     }
 }
@@ -76,11 +82,11 @@ impl<T> InplaceList<T> {
         debug_assert!(match node.next { Some(shared) => *shared != node, None => true });
     }
 
-    pub fn first(&self) -> Option<&Node<T>> {
+    pub fn last(&self) -> Option<&Node<T>> {
         self.first.map(|x| unsafe { &(**x) })
     }
 
-    pub fn first_mut(&self) -> Option<&mut Node<T>> {
+    pub fn last_mut(&self) -> Option<&mut Node<T>> {
         self.first.map(|x| unsafe { &mut (**x) })
     }
 
