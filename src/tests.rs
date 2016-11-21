@@ -12,6 +12,7 @@ fn test_sets() {
     test_set!(::ioports::ioports_tests::Tests);
     test_set!(utility::utility_tests::Tests);
     test_set!(mem::slab::slab_tests::Tests);
+    test_set!(mem::general_allocator::general_allocator_tests::Tests);
 }
 
 

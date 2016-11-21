@@ -12,7 +12,8 @@ extern {
 pub const MEMORY_START: usize = (!(1 << 47)) + 1 /* = 2^64 - 2^47*/;
 pub const KERNEL_START: usize = 0xffffffff80000000;
 
-pub const PAGE_SIZE: usize = 4096;
+pub const PAGE_SIZE_POWER: usize = 12;
+pub const PAGE_SIZE: usize = 1 << PAGE_SIZE_POWER;
 pub const TABLE_SIZE: usize = 512;
 const GB: usize = 1 << 30;
 

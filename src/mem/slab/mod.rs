@@ -207,7 +207,7 @@ pub mod slab_tests {
 
     tests_module!("slab_allocator",
         min_frame_at_least_node_size,
-        simple_allocate_test,
+        simple,
     );
 
     /// It is necessary to fit Node in not-allocated frames.
@@ -215,7 +215,7 @@ pub mod slab_tests {
         assert!(MIN_FRAME_SIZE >= size_of::<Node>());
     }
 
-    fn simple_allocate_test() {
+    fn simple() {
         const N: usize = 200;
         const SIZE: usize = 160;
 

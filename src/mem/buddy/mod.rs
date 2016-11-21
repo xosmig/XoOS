@@ -10,9 +10,14 @@ use self::single::Single;
 
 
 #[derive(PartialEq, Eq)]
+pub struct BuddyRaw {
+    pub single_num: usize,
+    pub pointer: NonZero<*mut u8>,
+}
+
+#[derive(PartialEq, Eq)]
 pub struct BuddyBox {
-    single_num: usize,
-    pointer: NonZero<*mut u8>,
+    raw: BuddyRaw,
 }
 
 /// Similar to std::boxed::Box.
@@ -20,7 +25,7 @@ pub struct BuddyBox {
 impl Deref for BuddyBox {
     type Target = NonZero<*mut u8>;
     fn deref(&self) -> &Self::Target {
-        &self.pointer
+        &self.raw.pointer
     }
 }
 
@@ -60,10 +65,18 @@ impl BuddyAllocator {
     }
 
     pub fn allocate_level(&mut self, level: usize) -> Option<BuddyBox> {
+        unsafe { self.allocate_level_raw(level).map(|x| BuddyBox { raw: x } ) }
+    }
+
+    pub fn allocate(&mut self, size: usize) -> Option<BuddyBox> {
+        unsafe { self.allocate_raw(size).map(|x| BuddyBox { raw: x } ) }
+    }
+
+    pub unsafe fn allocate_level_raw(&mut self, level: usize) -> Option<BuddyRaw> {
         let mut num = 0;
         while let Some(ptr) = self.singles[num] {
             if let Some(address) = unsafe{ (**ptr).allocate(level) } {
-                return Some(BuddyBox { single_num: num, pointer: address });
+                return Some(BuddyRaw { pointer: address, single_num: num });
             }
             num += 1;
         }
@@ -71,17 +84,22 @@ impl BuddyAllocator {
         None
     }
 
-    pub fn allocate(&mut self, size: usize) -> Option<BuddyBox> {
-        self.allocate_level(Self::size_to_level(size))
+    pub unsafe fn allocate_raw(&mut self, size: usize) -> Option<BuddyRaw> {
+        self.allocate_level_raw(Self::size_to_level(size))
     }
 
-    pub fn size_to_level(size: usize) -> usize {
+    pub unsafe fn deallocate_raw(&mut self, raw: &BuddyRaw) {
+        let single = &mut **(self.singles[raw.single_num].unwrap());
+        single.deallocate(raw.pointer);
+    }
+
+    fn size_to_level(size: usize) -> usize {
         debug_assert!(size > 0);
         log2_ceil((size + PAGE_SIZE - 1) / PAGE_SIZE)
     }
 
     unsafe fn deallocate(&mut self, bbox: &BuddyBox) {
-        (**(self.singles[bbox.single_num].unwrap())).deallocate(bbox.pointer);
+        self.deallocate_raw(&bbox.raw);
     }
 }
 

@@ -6,6 +6,7 @@ pub mod memory_map;
 
 pub mod buddy;
 pub mod slab;
+pub mod general_allocator;
 
 pub use ::core::mem::*;
 

@@ -6,6 +6,9 @@
 #![feature(nonzero)]
 #![feature(step_by)]
 #![feature(associated_consts)]
+#![feature(allocator)]
+
+#![allocator]
 
 #![no_std]
 
