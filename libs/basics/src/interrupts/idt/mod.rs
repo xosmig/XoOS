@@ -27,6 +27,8 @@ pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u64) {
     // timer
     if num == PIC_1.get_interrupt_idt_num(0) {
         __kernel_timer_tick();
+        // it will send EOI itself
+        return;
     }
 
     vga::print(b"!! Interrupt !!");

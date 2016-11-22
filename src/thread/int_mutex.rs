@@ -6,6 +6,7 @@ prelude!();
 use ::core::cell::UnsafeCell;
 use ::core::ops::{ Deref, DerefMut };
 
+
 pub struct IntMutex<T> {
     spin: ::spin::Mutex<T>,
 }
@@ -17,8 +18,10 @@ impl<T> IntMutex<T> {
 
     pub fn lock(&self) -> IntGuard<T> {
         unsafe {
+            // must be locked before locking interrupts
+            let ret = IntGuard { spin: self.spin.lock() };
             ::interrupts::lock_on_cpu();
-            IntGuard { spin: self.spin.lock() }
+            ret
         }
     }
 }
@@ -46,6 +49,3 @@ impl<'a, T> DerefMut for IntGuard<'a, T> {
         &mut *self.spin
     }
 }
-
-//unsafe impl<T> Sync for IntMutex<T> {}
-//unsafe impl<T> Send for IntMutex<T> {}

@@ -21,6 +21,12 @@ pub struct BuddyBox {
     raw: BuddyRaw,
 }
 
+impl BuddyBox {
+    pub fn get(&self) -> *mut u8 {
+        *self.raw.pointer
+    }
+}
+
 /// Similar to std::boxed::Box.
 /// Provides ownership for an allocation, and drop its content when it go out of scope.
 impl Deref for BuddyBox {
