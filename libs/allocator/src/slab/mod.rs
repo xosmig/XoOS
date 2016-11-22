@@ -16,8 +16,6 @@ struct Page<'a> {
     bbox: BuddyBox,
     /// The number of allocated frames on this page.
     cnt: usize,
-    /// A slab allocator, which owns this page.
-    allocator: Shared<SlabAllocator<'a>>,
     phantom: PhantomData<&'a u8>
 }
 
@@ -27,7 +25,6 @@ impl<'a> Page<'a> {
         Some(Page {
             bbox: tryo!(unsafe { BuddyAllocator::get_instance().allocate_level(0) }),
             cnt: 0,
-            allocator: unsafe { Shared::new(allocator) },
             phantom: PhantomData,
         })
     }
@@ -51,11 +48,6 @@ impl<'a> Page<'a> {
     /// Returns a pointer to the start of the page.
     fn ptr(&self) -> *mut u8 {
         **self.bbox
-    }
-
-    /// Returns a reference to a slab allocator, which owns this page.
-    unsafe fn get_allocator(&mut self) -> &'a mut SlabAllocator {
-        &mut **self.allocator
     }
 }
 
@@ -144,12 +136,6 @@ impl<'a> SlabAllocator<'a> {
         }
     }
 
-    /// Deallocates memory without a reference to its allocator
-    pub unsafe fn deallocate_unknown(ptr: *mut u8) {
-        let page_node: &mut PageNode<'a> = Self::get_page_node(ptr);
-        page_node.as_mut().get_allocator().deallocate(ptr);
-    }
-
     /// Necessary to check size of slab allocator which was created by call of `new_unchecked`
     pub fn check_correctness(&self) {
         Self::check_size(self.frame_size)
@@ -192,7 +178,6 @@ impl<'a> SlabAllocator<'a> {
         self.last_page_initialized += 1;
 
         debug_assert!(self.frames.last_mut().is_some());
-
     }
 
     unsafe fn add_node(&mut self, ptr: *mut u8) {

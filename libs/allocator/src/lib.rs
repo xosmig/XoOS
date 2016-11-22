@@ -68,7 +68,7 @@ pub extern fn __rust_deallocate(ptr: *mut u8, old_size: usize, _align: usize) {
     unsafe {
         if old_size <= slab::MAX_FRAME_SIZE {
             // use slab allocator for small frames
-            SlabAllocator::<'static>::deallocate_unknown(ptr);
+            SLABS[get_slub_num(old_size)].deallocate(ptr);
         } else {
             // use buddy allocator for big frames
             BuddyAllocator::get_instance().deallocate_unknown(ptr);
