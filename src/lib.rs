@@ -27,11 +27,9 @@ pub use ::basics::*;
 pub use core::{ cmp, ops, ptr };
 pub use ::alloc::boxed;
 
-#[macro_use] pub mod interrupts;
 mod prelude;
 pub mod error_handling;
-pub mod vga;
-pub mod pit;
+pub mod threads;
 
 use ::boot_info::MultibootInfo;
 use ::fmt::Write;
@@ -85,7 +83,7 @@ unsafe fn ini(info_ptr: usize) {
     let info = MultibootInfo::load(info_ptr);
     let mmap = info.memory_map();
 
-    interrupts::init_default();
+    interrupts::init();
     mem::paging::init_default();
     allocator::buddy::BuddyAllocator::init_default(&mmap);
 }

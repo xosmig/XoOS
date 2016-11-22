@@ -42,6 +42,3 @@ macro_rules! reborrow_mut {
     ($mref: expr) => ({ &mut *($mref as *mut _) });
     ($mref: expr, $t: tt) => ({ &mut *($mref as *mut $t) });
 }
-
-
-

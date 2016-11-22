@@ -31,7 +31,7 @@ pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u64) {
     }
 }
 
-pub unsafe fn init_default() {
+pub unsafe fn init() {
     let diff = interrupt1 as usize - interrupt0 as usize;
     for i in 0..IDT_SIZE {
         IDT_TABLE[i].set_offset(interrupt0 as usize + diff * i);

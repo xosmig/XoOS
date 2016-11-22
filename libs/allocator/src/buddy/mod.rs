@@ -8,7 +8,7 @@ use ::mem::paging::PAGE_SIZE;
 use ::utility::log2_ceil;
 use ::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
 use self::single::Single;
-
+use ::core::sync::atomic::*;
 
 #[derive(PartialEq, Eq)]
 pub struct BuddyRaw {
@@ -42,27 +42,27 @@ pub struct BuddyAllocator {
 }
 
 static mut INSTANCE: BuddyAllocator = BuddyAllocator { singles: [None; MAX_FRAMES_CNT] };
-static mut INITIALIZED: bool = false;
+static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 impl BuddyAllocator {
 
     /// unsafe because it depends on mmap correctness
-    pub unsafe fn init_default(mmap: &MemoryMap) {
-        if !INITIALIZED {
+    pub fn init_default(mmap: &MemoryMap) {
+        if !INITIALIZED.swap(true, Ordering::Relaxed) {
             let mut cnt = 0;
             for entry in mmap.iter() {
                 if let Some(single_ref) = Single::new(entry) {
-                    INSTANCE.singles[cnt] = Some(Shared::new(single_ref));
+                    // FIXME: thread safety
+                    unsafe { INSTANCE.singles[cnt] = Some(Shared::new(single_ref)) };
                     cnt += 1;
                 }
             }
-            INITIALIZED = true;
         }
     }
 
-    /// It's in terms of races.
-    pub unsafe fn get_instance() -> &'static mut Self {
-        &mut INSTANCE
+    pub fn get_instance() -> &'static mut Self {
+        assert!(INITIALIZED.load(Ordering::Relaxed) == true);
+        unsafe { &mut INSTANCE }  // FIXME:: thread safety
     }
 
     pub fn allocate_level(&mut self, level: usize) -> Option<BuddyBox> {

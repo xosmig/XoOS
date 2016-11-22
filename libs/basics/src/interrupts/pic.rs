@@ -1,8 +1,8 @@
 
 prelude!();
 
-use ::basics::ioports::*;
-use ::basics::utility::bit;
+use ::ioports::*;
+use ::utility::bit;
 
 pub struct Pic {
     command: IOPort<(), u8>,
@@ -33,7 +33,7 @@ pub static mut PIC_2: Pic = Pic {
     idt_start: 40,
 };
 
-pub unsafe fn init_default() {
+pub unsafe fn init() {
     // initialization command
     PIC_1.command.write(0x11);
     PIC_2.command.write(0x11);
