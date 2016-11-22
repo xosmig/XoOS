@@ -6,22 +6,27 @@
 #![feature(stmt_expr_attributes)]
 #![feature(shared)]
 #![feature(nonzero)]
+#![feature(naked_functions)]
+#![feature(drop_types_in_const)]
 #![feature(allocator)]
 #![feature(alloc, collections)]
 
 #![allocator]
-
 #![no_std]
 
 #![cfg_attr(os_test, allow(unused))]
 
 extern crate rlibc;
 
+#[macro_use]
+extern crate lazy_static;
+
 /// All code which is necessary to write allocator
 #[macro_use] extern crate basics;
 extern crate allocator;
 extern crate alloc;
 #[macro_use] extern crate collections;
+extern crate spin;
 
 pub use ::basics::*;
 pub use core::{ cmp, ops, ptr };
