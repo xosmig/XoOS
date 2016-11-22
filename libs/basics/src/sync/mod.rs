@@ -1,21 +1,21 @@
 
 pub use ::core::sync::*;
 
-mod ticket_lock;
+mod spinlock;
 
-pub use self::ticket_lock::*;
+pub use self::spinlock::*;
 
 pub trait Lock {
-    fn acquire(&mut self);
-    fn release(&mut self);
+    fn acquire(&self);
+    fn release(&self);
 }
 
 pub struct LockGuard<'a, L: 'a + Lock> {
-    lock: &'a mut L,
+    lock: &'a L,
 }
 
 impl<'a, L: 'a + Lock> LockGuard<'a, L> {
-    fn new(lock: &'a mut L) -> Self {
+    fn new(lock: &'a L) -> Self {
         lock.acquire();
         LockGuard { lock: lock }
     }

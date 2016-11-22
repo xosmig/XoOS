@@ -29,7 +29,7 @@ pub use ::alloc::boxed;
 
 mod prelude;
 pub mod error_handling;
-pub mod threads;
+pub mod thread;
 
 use ::boot_info::MultibootInfo;
 use ::fmt::Write;

@@ -26,4 +26,4 @@ pub mod mem;
 pub mod boot_info;
 pub mod vga;
 pub mod sync;
-pub mod pit;
+

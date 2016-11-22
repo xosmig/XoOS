@@ -19,6 +19,11 @@ impl Pic {
     pub fn has_interrupt(&self, num: u8) -> bool {
         num >= self.idt_start && num < self.idt_start + 8
     }
+
+    /// Returns the number of interruption in IDT.
+    pub fn get_interrupt_idt_num(&self, num: u8) -> u8 {
+        num + self.idt_start
+    }
 }
 
 pub static mut PIC_1: Pic = Pic {
@@ -93,3 +98,4 @@ pub fn unlock_all() {
         PIC_2.data.write(0x00);
     }
 }
+

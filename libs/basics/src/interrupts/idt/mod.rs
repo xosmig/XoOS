@@ -14,12 +14,21 @@ extern "C" {
     fn interrupt1();
 }
 
+extern {
+    fn __kernel_timer_tick();
+}
+
 const IDT_SIZE: usize = 64;
 
 static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
 
 #[no_mangle]
 pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u64) {
+    // timer
+    if num == PIC_1.get_interrupt_idt_num(0) {
+        __kernel_timer_tick();
+    }
+
     vga::print(b"!! Interrupt !!");
     println!("!! Interrupt: {:#x}, Error code: {:#x}", num, error_code);
     if PIC_1.has_interrupt(num) {
