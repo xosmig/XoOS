@@ -64,13 +64,14 @@ fn test_all() {
     println!("");
 
     // run_test_set::<path_to_your_tests_module::Tests>();
-    run_test_set::<test_lib::sample_mod::sample_mod_tests::Tests>();
-    run_test_set::<mem::paging::paging_tests::Tests>();
-    run_test_set::<ioports::ioports_tests::Tests>();
-    run_test_set::<utility::utility_tests::Tests>();
-    run_test_set::<allocator::buddy::buddy_tests::Tests>();
-    run_test_set::<allocator::slab::slab_tests::Tests>();
-    run_test_set::<allocator::allocator_tests::Tests>();
+    run_test_set::<::test_lib::sample_mod::sample_mod_tests::Tests>();
+    run_test_set::<::mem::paging::paging_tests::Tests>();
+    run_test_set::<::ioports::ioports_tests::Tests>();
+    run_test_set::<::utility::utility_tests::Tests>();
+    run_test_set::<::allocator::buddy::buddy_tests::Tests>();
+    run_test_set::<::allocator::slab::slab_tests::Tests>();
+    run_test_set::<::allocator::allocator_tests::Tests>();
+    run_test_set::<::thread::thread_tests::Tests>();
 
     println!("");
     println!("all tests passed [^_^]");

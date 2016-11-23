@@ -17,8 +17,8 @@ use ::sync::{ SpinLock, LockGuard };
 use ::core::marker::PhantomData;
 use ::collections::VecDeque;
 
-
-const TIME_UNIT: u16 = 256;
+// FIXME
+const TIME_FRAME: u16 = 256 * 128;
 
 
 lazy_static! {
@@ -67,7 +67,7 @@ impl Scheduler {
 
     /// It's inside `Scheduler` to ensure thread safety
     fn refresh_timer(&mut self) {
-        unsafe { pit::start_periodical(TIME_UNIT) };
+        unsafe { pit::start_periodical(TIME_FRAME) };
     }
 
     /// It's inside `Scheduler` to ensure thread safety
@@ -114,4 +114,16 @@ pub unsafe fn __kernel_timer_tick() {
     // EOI must be sent before switching context
     ::interrupts::pic::PIC_1.end_of_interrupt();
     SCHEDULER.lock().switch_to_next();
+}
+
+
+#[cfg(os_test)]
+pub mod thread_tests {
+    tests_module!("thread",
+        simple_spawn_test,
+    );
+
+    fn simple_spawn_test() {
+
+    }
 }
