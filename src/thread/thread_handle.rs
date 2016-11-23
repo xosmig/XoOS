@@ -43,13 +43,18 @@ pub struct JoinHandle<T> {
     result: CompResult<T>,
 }
 
+// Due to reference counter, there is no need to explicitly detach thread in drop.
+// There is even no way to do it.
 impl<T> JoinHandle<T> {
-    // TODO?: result of computation
     // TODO?: panic handling
-    pub fn join(self) -> Option<T> {
-        // TODO: join child thread
-        panic!("");
-        unsafe { (*self.result.0.get()).take() }
+    pub fn join(self) -> T {
+        unsafe {
+            // TODO: sleep (condition variable)
+            while (*self.result.0.get()).is_none() {}
+            // The child thread must be removed after join.
+            debug_assert!(Arc::strong_count(&self.result.0) == 1);
+            (*self.result.0.get()).take().unwrap()
+        }
     }
 }
 
@@ -62,9 +67,19 @@ impl<T> JoinHandle<T> {
 //}
 
 
-// FIXME: f probably should be FnOnce
+/// original documentation: https://doc.rust-lang.org/nightly/std/
+///
+/// Spawns a new thread, returning a `JoinHandle` for it.
+///
+/// The join handle will implicitly *detach* the child thread upon being
+/// dropped. In this case, the child thread may outlive the parent (unless
+/// the parent thread is the main thread; the whole process is terminated when
+/// the main thread finishes.) Additionally, the join handle provides a `join`
+/// method that can be used to join the child thread. If the child thread
+/// panics, `join` will return an `Err` containing the argument given to
+/// `panic`.
 pub fn spawn<T, F>(mut f: F) -> JoinHandle<T>
-    where F: FnMut() -> T + Send + 'static, T: Send + 'static
+    where F: FnOnce() -> T + Send + 'static, T: Send + 'static
 {
     let comp_res = CompResult(Arc::new(UnsafeCell::new(None)));
     let comp_res_in_f = comp_res.clone();
@@ -86,18 +101,23 @@ pub fn spawn<T, F>(mut f: F) -> JoinHandle<T>
 // FIXME: it returns `Thread`. M.b. it should be unsafe?
 // FIXME: m.b. it should be public (with changed name)
 /// Takes function without return value.
-fn spawn_impl<G>(mut runnable: G) -> Thread
-    where G: FnMut() -> () + Send + 'static
+fn spawn_impl<G>(mut g: G) -> Thread
+    where G: FnOnce() -> () + Send + 'static
 {
     unsafe extern "C" fn real_thread_start<G>()
-        where G: FnMut() -> () + Send + 'static
+        where G: FnOnce() -> () + Send + 'static
     {
-        let runnable: *mut G;
-        asm!("movq %rbx, %ax" : "={ax}"(runnable) : /*in*/ : /*clb*/ : "volatile");
-        (*runnable)();
+        let g_ptr: *mut G;
+        asm!("movq %rbx, %ax" : "={ax}"(g_ptr) : /*in*/ : /*clb*/ : "volatile");
+        let g = Box::from_raw(g_ptr);
+        g();
 
-        loop {}  // FIXME: sleep until join
-        // TODO: ???
+        //FIXME: probably loop is redundant.It must be killed by join and must not be waked up ever.
+        // waiting for join
+        loop {
+            SCHEDULER.lock().sleep_current();
+        }
+        unreachable!();
     }
 
     let mut context = Context {
@@ -107,7 +127,7 @@ fn spawn_impl<G>(mut runnable: G) -> Thread
         r13: 0,
         r12: 0,
         pbp: 0,
-        rbx: &mut runnable as *mut G as usize,
+        rbx: Box::into_raw(Box::new(g)) as usize,
         ret_address: real_thread_start::<G> as usize as *const u8,
     };
 

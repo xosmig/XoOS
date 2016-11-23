@@ -7,6 +7,7 @@
 #![feature(shared)]
 #![feature(nonzero)]
 #![feature(naked_functions)]
+#![feature(arc_counts)]
 #![feature(drop_types_in_const)]
 #![feature(allocator)]
 #![feature(alloc, collections)]
