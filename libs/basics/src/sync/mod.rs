@@ -1,28 +1,13 @@
 
 pub use ::core::sync::*;
 
-mod spinlock;
+pub mod not_owning;
 
-pub use self::spinlock::*;
+mod generic_mutex;
+pub use self::generic_mutex::*;
 
-pub trait Lock {
-    fn acquire(&self);
-    fn release(&self);
-}
+//pub use self::spinlock::*;
+//pub use self::lock_guard::*;
 
-pub struct LockGuard<'a, L: 'a + Lock> {
-    lock: &'a L,
-}
 
-impl<'a, L: 'a + Lock> LockGuard<'a, L> {
-    fn new(lock: &'a L) -> Self {
-        lock.acquire();
-        LockGuard { lock: lock }
-    }
-}
-
-impl<'a, L: 'a + Lock> Drop for LockGuard<'a, L> {
-    fn drop(&mut self) {
-        self.lock.release();
-    }
-}
+pub type SpinMutex<T> = GMutex<T, not_owning::SpinLock>;

@@ -4,6 +4,7 @@
 #![feature(const_fn)]
 #![feature(shared)]
 #![feature(nonzero)]
+#![feature(optin_builtin_traits)]
 
 #![no_std]
 

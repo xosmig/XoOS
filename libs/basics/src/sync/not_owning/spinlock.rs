@@ -1,4 +1,6 @@
 
+prelude!();
+
 use ::core::sync::atomic::*;
 use super::Lock;
 
@@ -9,7 +11,10 @@ pub struct SpinLock {
 
 impl SpinLock {
     pub const fn new() -> Self {
-         SpinLock { current: AtomicUsize::new(0), next: AtomicUsize::new(0) }
+         SpinLock {
+             current: AtomicUsize::new(0),
+             next: AtomicUsize::new(0),
+         }
     }
 }
 

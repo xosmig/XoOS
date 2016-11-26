@@ -47,6 +47,7 @@ pub struct BuddyAllocator {
     singles: [Option<Shared<Single>>; MAX_FRAMES_CNT],
 }
 
+//static mut INSTANCE: ::spin::Mutex<BuddyAllocator> = BuddyAllocator { singles: [None; MAX_FRAMES_CNT] };
 static mut INSTANCE: BuddyAllocator = BuddyAllocator { singles: [None; MAX_FRAMES_CNT] };
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
