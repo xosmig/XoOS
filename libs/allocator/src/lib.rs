@@ -14,6 +14,9 @@
 #![cfg_attr(os_test, allow(unused))]
 
 #[macro_use] extern crate basics;
+#[macro_use] extern crate lazy_static;
+#[macro_use] extern crate once;
+extern crate spin;
 
 pub use ::basics::*;
 use core::{ ptr, cmp };
@@ -24,6 +27,7 @@ pub mod slab;
 
 use slab::SlabAllocator;
 use buddy::BuddyAllocator;
+
 
 const SLAB_CNT: usize = 8;
 static mut SLABS: [SlabAllocator<'static>; SLAB_CNT] = unsafe {
@@ -58,7 +62,7 @@ pub extern fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
             SLABS[get_slub_num(size)].allocate()
         } else {
             // use buddy allocator for big frames
-            BuddyAllocator::get_instance().allocate_raw(size).map(|x| x.pointer)
+            BuddyAllocator::lock().allocate_raw(size).map(|x| x.pointer)
         }.expect("Failed to allocate memory")
     }
 }
@@ -71,7 +75,7 @@ pub extern fn __rust_deallocate(ptr: *mut u8, old_size: usize, _align: usize) {
             SLABS[get_slub_num(old_size)].deallocate(ptr);
         } else {
             // use buddy allocator for big frames
-            BuddyAllocator::get_instance().deallocate_unknown(ptr);
+            BuddyAllocator::lock().deallocate_unknown(ptr);
         }
     }
 

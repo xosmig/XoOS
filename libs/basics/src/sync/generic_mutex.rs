@@ -40,6 +40,7 @@ impl<'a, T, L> Drop for GMutexGuard<'a, T, L>
 }
 
 
+#[derive(Default)]
 pub struct GMutex<T, L: Lock + Default> {
     data: UnsafeCell<T>,
     lock: L,

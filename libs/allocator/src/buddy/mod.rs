@@ -9,6 +9,8 @@ use ::utility::log2_ceil;
 use ::mem::memory_map::{ MMAP_MAX_LEN as MAX_FRAMES_CNT, MemoryMap };
 use self::single::Single;
 use ::core::sync::atomic::*;
+use ::sync::{ SpinMutexGuard, SpinMutex };
+
 
 #[derive(PartialEq, Eq)]
 pub struct BuddyRaw {
@@ -38,38 +40,54 @@ impl Deref for BuddyBox {
 
 impl Drop for BuddyBox {
     fn drop(&mut self) {
-        unsafe { BuddyAllocator::get_instance().deallocate(self) };
+        unsafe { BuddyAllocator::lock().deallocate(self) };
     }
 }
 
 
 pub struct BuddyAllocator {
+    // I have to use `Shared` singles are stored in static memory so we can't own them.
     singles: [Option<Shared<Single>>; MAX_FRAMES_CNT],
 }
+// `Shared` doesn't implement Send, but in fact, we own singles.
+// So, this `impl` is safe.
+unsafe impl Send for BuddyAllocator {}
 
-//static mut INSTANCE: ::spin::Mutex<BuddyAllocator> = BuddyAllocator { singles: [None; MAX_FRAMES_CNT] };
-static mut INSTANCE: BuddyAllocator = BuddyAllocator { singles: [None; MAX_FRAMES_CNT] };
+
+lazy_static! {
+    static ref INSTANCE: SpinMutex<BuddyAllocator> = SpinMutex::new(
+        unsafe { BuddyAllocator::uninitialized() }
+    );
+}
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-impl BuddyAllocator {
+pub type BuddyAllocatorGuard = SpinMutexGuard<'static, BuddyAllocator>;
 
-    /// unsafe because it depends on mmap correctness
-    pub fn init_default(mmap: &MemoryMap) {
-        if !INITIALIZED.swap(true, Ordering::Relaxed) {
-            let mut cnt = 0;
-            for entry in mmap.iter() {
-                if let Some(single_ref) = Single::new(entry) {
-                    // FIXME: thread safety
-                    unsafe { INSTANCE.singles[cnt] = Some(Shared::new(single_ref)) };
-                    cnt += 1;
-                }
+
+impl BuddyAllocator {
+    const unsafe fn uninitialized() -> Self {
+        BuddyAllocator { singles: [None; MAX_FRAMES_CNT] }
+    }
+
+    /// Must be called only once in initialization process before threads initialization
+    pub unsafe fn init_default(mmap: &MemoryMap) {
+        if INITIALIZED.swap(true, Ordering::Relaxed) {
+            panic!("BuddyAllocator::init must be called only once");
+        }
+
+        let mut cnt = 0;
+        for entry in mmap.iter() {
+            if let Some(single_ref) = Single::new(entry) {
+                // FIXME: thread safety
+                unsafe { INSTANCE.lock().singles[cnt] = Some(Shared::new(single_ref)) };
+                cnt += 1;
             }
         }
     }
 
-    pub fn get_instance() -> &'static mut Self {
-        assert!(INITIALIZED.load(Ordering::Relaxed) == true);
-        unsafe { &mut INSTANCE }  // FIXME:: thread safety
+    pub fn lock() -> BuddyAllocatorGuard {
+        assert!(INITIALIZED.load(Ordering::Relaxed));
+        INSTANCE.lock()
     }
 
     pub fn allocate_level(&mut self, level: usize) -> Option<BuddyBox> {
@@ -145,12 +163,11 @@ pub mod buddy_tests {
         assert_eq!(6, BuddyAllocator::size_to_level(4096 * (1 << 6) - 1));
     }
 
-    fn allocate_test() {
-        let allocator = unsafe { BuddyAllocator::get_instance() };
-        let page1 = allocator.allocate(123).unwrap();
-        let page2 = allocator.allocate(123).unwrap();
-        let page3 = allocator.allocate(4096 * 2).unwrap();
-        let page4 = allocator.allocate(4096 * 10).unwrap();
+    fn allocate_test() {;
+        let page1 = BuddyAllocator::lock().allocate(123).unwrap();
+        let page2 = BuddyAllocator::lock().allocate(123).unwrap();
+        let page3 = BuddyAllocator::lock().allocate(4096 * 2).unwrap();
+        let page4 = BuddyAllocator::lock().allocate(4096 * 10).unwrap();
 
         assert!(**page1 as usize % 4096 == 0);
         assert!(**page2 as usize % 4096 == 0);
@@ -179,7 +196,7 @@ pub mod buddy_tests {
             }
         }
 
-        let _page = unsafe { BuddyAllocator::get_instance().allocate_level(0) };
+        let _page = unsafe { BuddyAllocator::lock().allocate_level(0) };
         let allocate_max_levels = || {
             let pages = allocate_max();
             let mut levels = [0; N];
@@ -204,7 +221,7 @@ pub mod buddy_tests {
         // Results of allocations must be different.
         {
             let levels1 = allocate_max_levels();
-            let _page = unsafe { BuddyAllocator::get_instance().allocate_level(0) };
+            let _page = unsafe { BuddyAllocator::lock().allocate_level(0) };
             let levels2 = allocate_max_levels();
             assert_ne!(levels1, levels2);
         }
@@ -212,7 +229,7 @@ pub mod buddy_tests {
     }
 
     fn max_possible_page() -> Option<(BuddyBox, usize)> {
-        let allocator = unsafe { BuddyAllocator::get_instance() };
+        let mut allocator = BuddyAllocator::lock();
         for level in (0..32).rev() {
             let res = allocator.allocate_level(level);
             if let Some(page) = res {

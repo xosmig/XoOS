@@ -11,10 +11,16 @@ pub struct SpinLock {
 
 impl SpinLock {
     pub const fn new() -> Self {
-         SpinLock {
-             current: AtomicUsize::new(0),
-             next: AtomicUsize::new(0),
-         }
+        SpinLock {
+            current: AtomicUsize::new(0),
+            next: AtomicUsize::new(0),
+        }
+    }
+}
+
+impl Default for SpinLock {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

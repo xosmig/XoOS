@@ -23,7 +23,7 @@ impl<'a> Page<'a> {
     /// Allocates one page in BuddyAllocator.
     fn allocate(allocator: &'a mut SlabAllocator) -> Option<Page<'a>> {
         Some(Page {
-            bbox: tryo!(unsafe { BuddyAllocator::get_instance().allocate_level(0) }),
+            bbox: tryo!(unsafe { BuddyAllocator::lock().allocate_level(0) }),
             cnt: 0,
             phantom: PhantomData,
         })

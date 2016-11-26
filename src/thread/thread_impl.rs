@@ -114,7 +114,7 @@ fn spawn_runnable<G>(mut g: G) -> Thread
     };
 
     // allocate a stack frame for new thread
-    let stack = BuddyAllocator::get_instance().allocate_level(THREAD_STACK_BUDDY_LEVEL)
+    let stack = BuddyAllocator::lock().allocate_level(THREAD_STACK_BUDDY_LEVEL)
         .expect("Failed to allocate stack frame for thread.");
     let stack_size = (1 << THREAD_STACK_BUDDY_LEVEL) * mem::paging::PAGE_SIZE as isize;
 
