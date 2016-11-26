@@ -14,8 +14,6 @@
 #![cfg_attr(os_test, allow(unused))]
 
 #[macro_use] extern crate basics;
-#[macro_use] extern crate lazy_static;
-#[macro_use] extern crate once;
 
 pub use ::basics::*;
 use core::{ ptr, cmp };
@@ -30,21 +28,8 @@ use ::sync::{ SpinMutex };
 
 const SLAB_CNT: usize = 8;
 
-lazy_static! {
-    static ref SLABS: SpinMutex<[SlabAllocator<'static>; SLAB_CNT]> = SpinMutex::new([
-        SlabAllocator::new(16),
-        SlabAllocator::new(32),
-        SlabAllocator::new(64),
-        SlabAllocator::new(128),
-        SlabAllocator::new(256),
-        SlabAllocator::new(512),
-        SlabAllocator::new(1024),
-        SlabAllocator::new(slab::MAX_FRAME_SIZE),
-    ]);
-}
 
-/*
-static mut SLABS: [SlabAllocator<'static>; SLAB_CNT] = unsafe {
+static mut SLABS: SpinMutex<[SlabAllocator<'static>; SLAB_CNT]> = SpinMutex::const_new(unsafe {
     [
         SlabAllocator::new_unchecked(16),
         SlabAllocator::new_unchecked(32),
@@ -55,8 +40,7 @@ static mut SLABS: [SlabAllocator<'static>; SLAB_CNT] = unsafe {
         SlabAllocator::new_unchecked(1024),
         SlabAllocator::new_unchecked(slab::MAX_FRAME_SIZE),
     ]
-};
-*/
+});
 
 fn get_slub_num(size: usize) -> usize {
     debug_assert!(size <= slab::MAX_FRAME_SIZE);

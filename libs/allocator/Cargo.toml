@@ -5,11 +5,6 @@ authors = ["Andrey Tonkikh <xosmig@gmail.com>"]
 
 [dependencies]
 rlibc = "1.0.0" # memcpy, memset, etc. Required for libc.
-once = "0.3.2"
-
-[dependencies.lazy_static]
-version = "0.2.2"
-features = ["nightly", "spin_no_std"]
 
 [dependencies.basics]
 path = "../../libs/basics"

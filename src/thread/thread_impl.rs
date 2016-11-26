@@ -11,14 +11,6 @@ use super::SCHEDULER;
 // 16kb for each thread
 const THREAD_STACK_BUDDY_LEVEL: usize = 2;
 
-lazy_static! {
-    pub static ref MAIN_THREAD_ARC: Arc<ThreadRepr> = Arc::new(ThreadRepr {
-        stack: None,                // It already has stack.
-        stack_ptr: 0 as *mut _,     // That's fine that the stack pointer for active thread is incorrect.
-                                    // The main thread is active at the moment of its initialization
-    });
-}
-
 
 /// Inner representation of thread
 pub struct ThreadRepr {

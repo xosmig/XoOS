@@ -54,11 +54,9 @@ pub struct BuddyAllocator {
 unsafe impl Send for BuddyAllocator {}
 
 
-lazy_static! {
-    static ref INSTANCE: SpinMutex<BuddyAllocator> = SpinMutex::new(
-        unsafe { BuddyAllocator::uninitialized() }
-    );
-}
+static INSTANCE: SpinMutex<BuddyAllocator> = SpinMutex::const_new(unsafe {
+    BuddyAllocator::uninitialized()
+});
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 pub type BuddyAllocatorGuard = SpinMutexGuard<'static, BuddyAllocator>;

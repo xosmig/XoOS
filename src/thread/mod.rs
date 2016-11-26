@@ -10,7 +10,7 @@ mod thread_impl;
 pub use self::thread_impl::{ spawn, Thread, JoinHandle };
 //use self::int_mutex::*;
 
-use self::thread_impl::{ ThreadRepr, MAIN_THREAD_ARC };
+use self::thread_impl::ThreadRepr;
 use ::alloc::arc::Arc;
 use ::collections::VecDeque;
 use ::core::cell::UnsafeCell;
@@ -30,20 +30,31 @@ type QueueT = VecDeque<Arc<ThreadRepr>>;
 struct Scheduler {
     // TODO: inplace queue
     queue: UnsafeCell<Option<QueueT>>,
+    main_thread: UnsafeCell<Option<Arc<ThreadRepr>>>,
 }
 unsafe impl Sync for Scheduler {}
 unsafe impl Send for Scheduler {}
 
 impl Scheduler {
     const unsafe fn uninitialized() -> Self {
-        Scheduler { queue: UnsafeCell::new(None) }
+        Scheduler { queue: UnsafeCell::new(None), main_thread: UnsafeCell::new(None) }
     }
 
     unsafe fn init(&self) {
+        // initialize queue
         (*self.queue.get()) = Some(VecDeque::new());
 
+        // initialize main thread object
+        (*self.main_thread.get()) = Some(Arc::new(
+            ThreadRepr {
+                stack: None,                // It already has stack.
+                stack_ptr: 0 as *mut _,     // That's fine that the stack pointer for active thread is incorrect.
+                                            // The main thread is active at the moment of its initialization
+            }
+        ));
+
         // we need to add main thread in the queue
-        self.get().push_back(MAIN_THREAD_ARC.clone());
+        self.get().push_back((&*self.main_thread.get()).as_ref().unwrap().clone());
 
         self.refresh_timer();
         pit::unlock_interrupt();

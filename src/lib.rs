@@ -19,8 +19,6 @@
 
 extern crate rlibc;
 
-#[macro_use]
-extern crate lazy_static;
 
 /// All code which is necessary to write allocator
 #[macro_use] extern crate basics;

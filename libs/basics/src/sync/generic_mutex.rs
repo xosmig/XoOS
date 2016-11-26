@@ -60,3 +60,15 @@ impl<T: Send, L: Lock + Default> GMutex<T, L> {
         GMutexGuard { mutex: self }
     }
 }
+
+
+use super::not_owning::SpinLock;
+
+impl<T: Send> GMutex<T, SpinLock> {
+    pub const fn const_new(data: T) -> Self {
+        GMutex {
+            data: UnsafeCell::new(data),
+            lock: SpinLock::new(),
+        }
+    }
+}
