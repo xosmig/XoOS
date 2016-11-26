@@ -1,7 +1,6 @@
 
 prelude!();
 
-use ::core::marker::PhantomData;
 use ::alloc::arc::Arc;
 use ::allocator::buddy::{ BuddyBox, BuddyAllocator };
 use ::core::cell::UnsafeCell;
@@ -32,6 +31,8 @@ unsafe impl Sync for ThreadRepr {}
 
 /// A handle to a thread.
 pub struct Thread {
+    // that's ok to just contain Arc and never use it
+    #[allow(dead_code)]  // FIXME
     repr: Arc<ThreadRepr>,
 }
 
@@ -51,6 +52,8 @@ unsafe impl<T: Sync> Sync for CompResult<T> {}
 /// Provides ownership over thread.
 /// Detaches the child thread when `JoinHandle` is dropped.
 pub struct JoinHandle<T> {
+    // that's ok to just contain Arc and never use it
+    #[allow(dead_code)]  // FIXME
     thread: Thread,
     result: CompResult<T>,
 }
@@ -76,7 +79,7 @@ impl<T> JoinHandle<T> {
 
 
 /// Spawns a new thread, returning a `JoinHandle` for it.
-pub fn spawn<T, F>(mut f: F) -> JoinHandle<T>
+pub fn spawn<T, F>(f: F) -> JoinHandle<T>
     where F: FnOnce() -> T + Send + 'static, T: Send + 'static
 {
     let comp_res = CompResult(Arc::new(UnsafeCell::new(None)));
@@ -99,10 +102,10 @@ pub fn spawn<T, F>(mut f: F) -> JoinHandle<T>
 // FIXME?: it returns `Thread` instead of `FrictionJoint`. M.b. it should be unsafe?
 // FIXME: m.b. it should be public (with changed name)
 /// Takes function returning unit.
-fn spawn_runnable<G>(mut g: G) -> Thread
+fn spawn_runnable<G>(g: G) -> Thread
     where G: FnOnce() -> () + Send + 'static
 {
-    let mut context = Context {
+    let context = Context {
         flags: 0,
         r15: 0,
         r14: 0,
@@ -142,7 +145,6 @@ unsafe extern "C" fn real_thread_start<G>()
     loop {
         SCHEDULER.sleep_current();
     }
-    unreachable!();
 }
 
 

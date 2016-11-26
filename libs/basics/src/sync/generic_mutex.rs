@@ -1,10 +1,9 @@
 
 prelude!();
 
-use ::core::sync::atomic::*;
 use ::core::cell::UnsafeCell;
 
-use super::not_owning::{ SpinLock, Lock };
+use super::not_owning::{ Lock };
 use ::core::ops::{ Deref, DerefMut };
 
 

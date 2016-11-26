@@ -21,9 +21,9 @@ struct Page<'a> {
 
 impl<'a> Page<'a> {
     /// Allocates one page in BuddyAllocator.
-    fn allocate(allocator: &'a mut SlabAllocator) -> Option<Page<'a>> {
+    fn allocate() -> Option<Page<'a>> {
         Some(Page {
-            bbox: tryo!(unsafe { BuddyAllocator::lock().allocate_level(0) }),
+            bbox: tryo!(BuddyAllocator::lock().allocate_level(0)),
             cnt: 0,
             phantom: PhantomData,
         })
@@ -148,11 +148,7 @@ impl<'a> SlabAllocator<'a> {
     }
 
     fn allocate_page(&mut self) -> Option<()> {
-        let page: Page<'a> = unsafe {
-            // FIXME: avoid reborrow_mut
-            let self2 = reborrow_mut!(self);
-            tryo!(Page::allocate(self2))
-        };
+        let page: Page<'a> = tryo!(Page::allocate());
 
         let page_start = page.ptr();
 

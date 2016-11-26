@@ -79,7 +79,7 @@ impl BuddyAllocator {
         for entry in mmap.iter() {
             if let Some(single_ref) = Single::new(entry) {
                 // FIXME: thread safety
-                unsafe { INSTANCE.lock().singles[cnt] = Some(Shared::new(single_ref)) };
+                INSTANCE.lock().singles[cnt] = Some(Shared::new(single_ref));
                 cnt += 1;
             }
         }

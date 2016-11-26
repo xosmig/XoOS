@@ -12,8 +12,6 @@ pub use self::thread_impl::{ spawn, Thread, JoinHandle };
 
 use self::thread_impl::{ ThreadRepr, MAIN_THREAD_ARC };
 use ::alloc::arc::Arc;
-use ::collections::string::String;
-use ::core::marker::PhantomData;
 use ::collections::VecDeque;
 use ::core::cell::UnsafeCell;
 

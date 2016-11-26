@@ -49,10 +49,10 @@ pub unsafe fn init() {
     }
 
     // 0 pic interrupt is used by thread scheduler
-    {
-        let idx = PIC_1.get_interrupt_idt_num(0) as usize;
+//    { // FIXME
+//        let idx = PIC_1.get_interrupt_idt_num(0) as usize;
 //        IDT_TABLE[idx].type_attr = InterruptType::ValidInterruptGate;
-    }
+//    }
 
     let ptr = IdtPtr::new(&IDT_TABLE);
     ptr.load()
