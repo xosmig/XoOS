@@ -93,6 +93,7 @@ unsafe fn ini(info_ptr: usize) {
     interrupts::init();
     mem::paging::init_default();
     allocator::buddy::BuddyAllocator::init_default(&mmap);
+    thread::init();
 }
 
 

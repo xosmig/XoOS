@@ -24,7 +24,7 @@ static mut IDT_TABLE: [IdtItem; IDT_SIZE] = [IdtItem::new(); IDT_SIZE];
 
 #[no_mangle]
 pub unsafe extern "C" fn handle_interrupt(num: u8, error_code: u64) {
-    // timer
+    // thread timer
     if num == PIC_1.get_interrupt_idt_num(0) {
         __kernel_timer_tick();
         // it will send EOI itself
@@ -47,6 +47,13 @@ pub unsafe fn init() {
     for i in 0..IDT_SIZE {
         IDT_TABLE[i].set_offset(interrupt0 as usize + diff * i);
     }
+
+    // 0 pic interrupt is used by thread scheduler
+    {
+        let idx = PIC_1.get_interrupt_idt_num(0) as usize;
+//        IDT_TABLE[idx].type_attr = InterruptType::ValidInterruptGate;
+    }
+
     let ptr = IdtPtr::new(&IDT_TABLE);
     ptr.load()
 }
