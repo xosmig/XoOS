@@ -138,7 +138,7 @@ pub mod thread_tests {
                     // uncomment this line to check that the order isn't straight
                     // (though it may be straight with high probability)
                     // All threads should finish at the same time (fairness)
-                    println!("thread {} finished", i);
+                    //println!("thread {} finished", i);
                     sum
                 })
             );
