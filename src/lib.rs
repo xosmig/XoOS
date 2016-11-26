@@ -27,7 +27,6 @@ extern crate lazy_static;
 extern crate allocator;
 extern crate alloc;
 #[macro_use] extern crate collections;
-extern crate spin;
 
 pub use ::basics::*;
 pub use core::{ cmp, ops, ptr };

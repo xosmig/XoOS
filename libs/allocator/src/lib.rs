@@ -16,7 +16,6 @@
 #[macro_use] extern crate basics;
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate once;
-extern crate spin;
 
 pub use ::basics::*;
 use core::{ ptr, cmp };
