@@ -106,6 +106,7 @@ pub mod allocator_tests {
     use super::{ SLABS, get_slub_num };
     tests_module!("allocator",
         get_slub_num_test,
+        check_slab_sizes,
         allocate_simple,
     );
 
@@ -123,6 +124,14 @@ pub mod allocator_tests {
         assert!(get_slub_num(128) == 3);
         assert!(get_slub_num(129) == 4);
         assert!(get_slub_num(256) == 4);
+    }
+
+    fn check_slab_sizes() {
+        unsafe {
+            for slab in &*SLABS.lock() {
+                slab.check_correctness();
+            }
+        }
     }
 
     fn allocate_simple() {
