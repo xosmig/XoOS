@@ -27,9 +27,24 @@ pub mod slab;
 
 use slab::SlabAllocator;
 use buddy::BuddyAllocator;
-
+use ::sync::{ SpinMutex };
 
 const SLAB_CNT: usize = 8;
+
+lazy_static! {
+    static ref SLABS: SpinMutex<[SlabAllocator<'static>; SLAB_CNT]> = SpinMutex::new([
+        SlabAllocator::new(16),
+        SlabAllocator::new(32),
+        SlabAllocator::new(64),
+        SlabAllocator::new(128),
+        SlabAllocator::new(256),
+        SlabAllocator::new(512),
+        SlabAllocator::new(1024),
+        SlabAllocator::new(slab::MAX_FRAME_SIZE),
+    ]);
+}
+
+/*
 static mut SLABS: [SlabAllocator<'static>; SLAB_CNT] = unsafe {
     [
         SlabAllocator::new_unchecked(16),
@@ -42,6 +57,7 @@ static mut SLABS: [SlabAllocator<'static>; SLAB_CNT] = unsafe {
         SlabAllocator::new_unchecked(slab::MAX_FRAME_SIZE),
     ]
 };
+*/
 
 fn get_slub_num(size: usize) -> usize {
     debug_assert!(size <= slab::MAX_FRAME_SIZE);
@@ -59,7 +75,7 @@ pub extern fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
         // there is deref operator to cast from NonZero<*mut u8> to *mut u8
         *if size <= slab::MAX_FRAME_SIZE {
             // use slab allocator for small frames
-            SLABS[get_slub_num(size)].allocate()
+            SLABS.lock() [get_slub_num(size)] .allocate()
         } else {
             // use buddy allocator for big frames
             BuddyAllocator::lock().allocate_raw(size).map(|x| x.pointer)
@@ -72,7 +88,7 @@ pub extern fn __rust_deallocate(ptr: *mut u8, old_size: usize, _align: usize) {
     unsafe {
         if old_size <= slab::MAX_FRAME_SIZE {
             // use slab allocator for small frames
-            SLABS[get_slub_num(old_size)].deallocate(ptr);
+            SLABS.lock() [get_slub_num(old_size)] .deallocate(ptr);
         } else {
             // use buddy allocator for big frames
             BuddyAllocator::lock().deallocate_unknown(ptr);
@@ -107,7 +123,6 @@ pub mod allocator_tests {
     use super::{ SLABS, get_slub_num };
     tests_module!("allocator",
         get_slub_num_test,
-        check_slab_sizes,
         allocate_simple,
     );
 
@@ -125,14 +140,6 @@ pub mod allocator_tests {
         assert!(get_slub_num(128) == 3);
         assert!(get_slub_num(129) == 4);
         assert!(get_slub_num(256) == 4);
-    }
-
-    fn check_slab_sizes() {
-        unsafe {
-            for slab in &SLABS {
-                slab.check_correctness();
-            }
-        }
     }
 
     fn allocate_simple() {

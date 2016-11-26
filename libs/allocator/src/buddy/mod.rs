@@ -49,7 +49,7 @@ pub struct BuddyAllocator {
     // I have to use `Shared` singles are stored in static memory so we can't own them.
     singles: [Option<Shared<Single>>; MAX_FRAMES_CNT],
 }
-// `Shared` doesn't implement Send, but in fact, we own singles.
+// `Shared` doesn't implement Send, but all data is static and we are the only one who can modify it.
 // So, this `impl` is safe.
 unsafe impl Send for BuddyAllocator {}
 

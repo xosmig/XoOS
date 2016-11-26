@@ -51,7 +51,6 @@ impl<'a> Page<'a> {
     }
 }
 
-// https://github.com/rust-lang/rfcs/issues/1144
 
 /// Must be at least size_of::<Node>()
 pub const MIN_FRAME_SIZE: usize = 16;
@@ -69,6 +68,8 @@ pub struct SlabAllocator<'a> {
     /// Provides lazy page initialization. It's extremely beneficial in some cases.
     last_page_initialized: usize,
 }
+// FIXME: I don't know if it is really appropriate and safe, but I need it to compile the project.
+unsafe impl<'a> Send for SlabAllocator<'a> {}
 
 
 impl<'a> SlabAllocator<'a> {
