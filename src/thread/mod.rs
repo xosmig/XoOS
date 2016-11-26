@@ -23,11 +23,6 @@ extern "C" {
 }
 
 
-
-//lazy_static! {
-//    static ref SCHEDULER: IntMutex<Scheduler> = IntMutex::new(Scheduler::new());
-//}
-
 static SCHEDULER: Scheduler = unsafe { Scheduler::uninitialized() };
 
 type QueueT = VecDeque<Arc<ThreadRepr>>;
@@ -73,9 +68,8 @@ impl Scheduler {
         let prev = prev_arc.as_ref() as *const _ as *mut _;
         let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
 
+        self.refresh_timer();
         unsafe { self.switch_threads(prev, next) };
-
-//        self.refresh_timer();
     }
 
     // FIXME?: assumes that there is at least one active thread.
@@ -87,11 +81,11 @@ impl Scheduler {
             self.get().push_back(th);
             let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
 
+            self.refresh_timer();
             unsafe { self.switch_threads(prev, next) };
         }
     }
 
-    /// It's inside `Scheduler` to ensure thread safety
     fn refresh_timer(&self) {
         unsafe { pit::start_periodical(TIME_FRAME) };
     }
@@ -106,11 +100,7 @@ impl Scheduler {
 /// Should be called only by corresponding interrupt handler.
 #[no_mangle]
 pub unsafe fn __kernel_timer_tick() {
-    //    ::interrupts::lock_on_cpu();
-    // EOI must be sent before switching context and after locking interrupts
     ::interrupts::pic::PIC_1.end_of_interrupt();
-//    ::interrupts::unlock_on_cpu();
-
     SCHEDULER.switch_to_next();
 }
 
@@ -124,7 +114,7 @@ pub unsafe fn init() {
 pub mod thread_tests {
     tests_module!("thread",
         one_spawn,
-        harder,
+        long_computation_10_threads,
     );
 
     fn one_spawn() {
@@ -133,7 +123,7 @@ pub mod thread_tests {
         assert!(res == 5);
     }
 
-    fn harder() {
+    fn long_computation_10_threads() {
         let mut threads = vec![];
 
         for i in 0..10 {
@@ -141,9 +131,14 @@ pub mod thread_tests {
             threads.push(
                 ::thread::spawn(move || {
                     let mut sum: u64 = 0;
-                    for j in i..100_000 {
+                    for j in (i * i)..500_000 {
                         sum += j;
                     }
+                    // TODO: automatically check
+                    // uncomment this line to check that the order isn't straight
+                    // (though it may be straight with high probability)
+                    // All threads should finish at the same time (fairness)
+                    println!("thread {} finished", i);
                     sum
                 })
             );
@@ -154,7 +149,7 @@ pub mod thread_tests {
             res.push(th.join());
         }
 
-        assert_eq!(res, [4999950000, 4999950000, 4999949999, 4999949997, 4999949994, 4999949990, 4999949985,
-                        4999949979, 4999949972, 4999949964])
+        assert_eq!(res, [124999750000, 124999750000, 124999749994, 124999749964, 124999749880, 124999749700,
+                         124999749370, 124999748824, 124999747984, 124999746760])
     }
 }

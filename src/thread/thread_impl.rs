@@ -38,7 +38,6 @@ pub struct Thread {
 
 
 /// Used to communicate the return value between the child thread and the parent thread.
-// #[derive(Clone)]  // I wonder why it doesn't work
 struct CompResult<T>(Arc<UnsafeCell<Option<T>>>);
 impl<T> Clone for CompResult<T> {
     fn clone(&self) -> Self {
