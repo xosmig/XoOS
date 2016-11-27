@@ -66,7 +66,7 @@ impl<T> JoinHandle<T> {
         unsafe {
             // TODO?: sleep (condition variable?)
             // Or I can have a reference to a parent thread to wake it up.
-            while (*self.result.0.get()).is_none() {
+            while (*self.result.0.get()).is_none() || Arc::strong_count(&self.result.0) > 1 {
                 SCHEDULER.switch_to_next();  // skip frame
             }
             (*self.result.0.get()).take().unwrap()  // return the result of computation
@@ -137,11 +137,9 @@ unsafe extern "C" fn real_thread_start<G>()
     let g = Box::from_raw(g_ptr);
     g();
 
-    // FIXME: probably loop is redundant. It must be killed by join and must be never waked up.
     // waiting for join
-    loop {
-        SCHEDULER.sleep_current();
-    }
+    SCHEDULER.sleep_current();
+    unreachable!();
 }
 
 
