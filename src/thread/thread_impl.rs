@@ -69,9 +69,6 @@ impl<T> JoinHandle<T> {
             while (*self.result.0.get()).is_none() {
                 SCHEDULER.switch_to_next();  // skip frame
             }
-            // It must be the last reference to the child thread
-            // because it must be automatically removed after join.
-            debug_assert!(Arc::strong_count(&self.result.0) == 1);
             (*self.result.0.get()).take().unwrap()  // return the result of computation
         }
     }
