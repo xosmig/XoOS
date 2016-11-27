@@ -65,9 +65,9 @@ impl Scheduler {
 
     /// Adds new thread to the queue.
     pub fn add(&self, thread: Arc<ThreadRepr>) {
-        ::interrupts::lock_on_cpu();
+        unsafe { ::interrupts::lock_on_cpu() };
         self.get().push_back(thread);
-        ::interrupts::unlock_on_cpu();
+        unsafe { ::interrupts::unlock_on_cpu() };
     }
 
     // FIXME?: assumes that there is at least one active thread.
@@ -122,7 +122,9 @@ pub unsafe fn __kernel_timer_tick() {
 
 // FIXME: once
 pub unsafe fn init() {
+    unsafe { ::interrupts::lock_on_cpu() };
     SCHEDULER.init();
+    unsafe { ::interrupts::unlock_on_cpu() };
 }
 
 #[cfg(os_test)]
