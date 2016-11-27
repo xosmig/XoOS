@@ -74,11 +74,12 @@ impl Scheduler {
     /// Removes current thread from queue.
     pub fn sleep_current(&self) {
         unsafe { ::interrupts::lock_on_cpu() };
-        debug_assert!(self.get().len() >= 1);
+        debug_assert!(self.get().len() >= 2);
 
         let prev_arc = self.get().pop_front().unwrap();
         let prev = prev_arc.as_ref() as *const _ as *mut _;
         let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
+        ::utility::drop(prev_arc);
 
         self.refresh_timer();
         unsafe { self.switch_threads(prev, next) };
@@ -122,9 +123,9 @@ pub unsafe fn __kernel_timer_tick() {
 
 // FIXME: once
 pub unsafe fn init() {
-    unsafe { ::interrupts::lock_on_cpu() };
+//    unsafe { ::interrupts::lock_on_cpu() };
     SCHEDULER.init();
-    unsafe { ::interrupts::unlock_on_cpu() };
+//    unsafe { ::interrupts::unlock_on_cpu() };
 }
 
 #[cfg(os_test)]

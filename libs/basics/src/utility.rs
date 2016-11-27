@@ -61,6 +61,8 @@ pub fn round_down<T:UInt>(x: T, base:T) -> T {
     T::from64((x.to64() / base) * base)
 }
 
+pub fn drop<T>(t: T) {}
+
 
 #[cfg(os_test)]
 pub mod utility_tests {

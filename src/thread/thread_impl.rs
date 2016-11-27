@@ -20,6 +20,15 @@ pub struct ThreadRepr {
 unsafe impl Send for ThreadRepr {}
 unsafe impl Sync for ThreadRepr {}
 
+// uncomment these lines to check for memory leaks
+/*
+impl Drop for ThreadRepr {
+    fn drop(&mut self) {
+        println!("Thread deallocated");
+    }
+}
+*/
+
 
 /// A handle to a thread.
 pub struct Thread {
