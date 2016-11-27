@@ -65,7 +65,9 @@ impl Scheduler {
 
     /// Adds new thread to the queue.
     pub fn add(&self, thread: Arc<ThreadRepr>) {
+        ::interrupts::lock_on_cpu();
         self.get().push_back(thread);
+        ::interrupts::unlock_on_cpu();
     }
 
     // FIXME?: assumes that there is at least one active thread.
