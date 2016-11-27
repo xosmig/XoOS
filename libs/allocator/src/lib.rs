@@ -29,18 +29,18 @@ use ::sync::{ SpinMutex };
 const SLAB_CNT: usize = 8;
 
 
-static mut SLABS: SpinMutex<[SlabAllocator<'static>; SLAB_CNT]> = SpinMutex::const_new(unsafe {
+static mut SLABS: [SpinMutex<SlabAllocator<'static>>; SLAB_CNT] = unsafe {
     [
-        SlabAllocator::new_unchecked(16),
-        SlabAllocator::new_unchecked(32),
-        SlabAllocator::new_unchecked(64),
-        SlabAllocator::new_unchecked(128),
-        SlabAllocator::new_unchecked(256),
-        SlabAllocator::new_unchecked(512),
-        SlabAllocator::new_unchecked(1024),
-        SlabAllocator::new_unchecked(slab::MAX_FRAME_SIZE),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(16)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(32)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(64)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(128)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(256)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(512)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(1024)),
+        SpinMutex::const_new(SlabAllocator::new_unchecked(slab::MAX_FRAME_SIZE)),
     ]
-});
+};
 
 fn get_slub_num(size: usize) -> usize {
     debug_assert!(size <= slab::MAX_FRAME_SIZE);
@@ -58,7 +58,7 @@ pub extern fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
         // there is deref operator to cast from NonZero<*mut u8> to *mut u8
         *if size <= slab::MAX_FRAME_SIZE {
             // use slab allocator for small frames
-            SLABS.lock() [get_slub_num(size)] .allocate()
+            SLABS[get_slub_num(size)].lock().allocate()
         } else {
             // use buddy allocator for big frames
             BuddyAllocator::lock().allocate_raw(size).map(|x| x.pointer)
@@ -71,7 +71,7 @@ pub extern fn __rust_deallocate(ptr: *mut u8, old_size: usize, _align: usize) {
     unsafe {
         if old_size <= slab::MAX_FRAME_SIZE {
             // use slab allocator for small frames
-            SLABS.lock() [get_slub_num(old_size)] .deallocate(ptr);
+            SLABS[get_slub_num(old_size)].lock().deallocate(ptr);
         } else {
             // use buddy allocator for big frames
             BuddyAllocator::lock().deallocate_unknown(ptr);
@@ -128,8 +128,8 @@ pub mod allocator_tests {
 
     fn check_slab_sizes() {
         unsafe {
-            for slab in &*SLABS.lock() {
-                slab.check_correctness();
+            for slab in &SLABS {
+                slab.lock().check_correctness();
             }
         }
     }

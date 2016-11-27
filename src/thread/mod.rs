@@ -79,25 +79,20 @@ impl Scheduler {
         let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
 
         self.refresh_timer();
-
-        unsafe { ::interrupts::unlock_on_cpu() };
         unsafe { self.switch_threads(prev, next) };
     }
 
     // FIXME?: assumes that there is at least one active thread.
     pub fn switch_to_next(&self) {
+        unsafe { ::interrupts::lock_on_cpu() };
         debug_assert!(self.get().len() >= 1);
         if self.get().len() > 1 {
-            unsafe { ::interrupts::lock_on_cpu() };
-
             let th = self.get().pop_front().unwrap();
             let prev = th.as_ref() as *const _ as *mut _;
             self.get().push_back(th);
             let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
 
             self.refresh_timer();
-
-            unsafe { ::interrupts::unlock_on_cpu() };
             unsafe { self.switch_threads(prev, next) };
         }
     }

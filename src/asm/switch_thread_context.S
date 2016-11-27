@@ -37,4 +37,5 @@ switch_thread_context:
     popq %rbp
     popq %rbx
 
+    sti  // unlock interrupts
     ret
