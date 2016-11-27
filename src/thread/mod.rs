@@ -1,6 +1,4 @@
 
-// TODO: remove some guards
-
 prelude!();
 
 //mod int_mutex;
@@ -29,7 +27,6 @@ static SCHEDULER: Scheduler = unsafe { Scheduler::uninitialized() };
 type QueueT = VecDeque<Arc<ThreadRepr>>;
 
 struct Scheduler {
-    // TODO: inplace queue
     queue: UnsafeCell<Option<QueueT>>,
     main_thread: UnsafeCell<Option<Arc<ThreadRepr>>>,
 }
