@@ -2,8 +2,8 @@
     .global switch_thread_context
 
 switch_thread_context:
-    #define     FLAGS_TO_CHANGE 0xD5
-    #define NOT_FLAGS_TO_CHANGE (~0xD5)
+    #define     FLAGS_TO_CHANGE 0b11010101
+    #define NOT_FLAGS_TO_CHANGE (~FLAGS_TO_CHANGE)
 
     // save context on stack
     pushq %rbx
