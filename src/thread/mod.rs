@@ -15,6 +15,7 @@ use ::alloc::arc::Arc;
 use ::collections::VecDeque;
 use ::core::cell::UnsafeCell;
 
+
 // FIXME
 const TIME_FRAME: u16 = 256 * 255;
 
@@ -73,6 +74,7 @@ impl Scheduler {
     // FIXME?: assumes that there is at least one active thread.
     /// Removes current thread from queue.
     pub fn sleep_current(&self) {
+        unsafe { ::interrupts::lock_on_cpu() };
         debug_assert!(self.get().len() >= 1);
 
         let prev_arc = self.get().pop_front().unwrap();
@@ -80,6 +82,8 @@ impl Scheduler {
         let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
 
         self.refresh_timer();
+
+        unsafe { ::interrupts::unlock_on_cpu() };
         unsafe { self.switch_threads(prev, next) };
     }
 
@@ -87,12 +91,16 @@ impl Scheduler {
     pub fn switch_to_next(&self) {
         debug_assert!(self.get().len() >= 1);
         if self.get().len() > 1 {
+            unsafe { ::interrupts::lock_on_cpu() };
+
             let th = self.get().pop_front().unwrap();
             let prev = th.as_ref() as *const _ as *mut _;
             self.get().push_back(th);
             let next = self.get().front().unwrap().as_ref() as *const _ as *mut _;
 
             self.refresh_timer();
+
+            unsafe { ::interrupts::unlock_on_cpu() };
             unsafe { self.switch_threads(prev, next) };
         }
     }
@@ -142,7 +150,7 @@ pub mod thread_tests {
             threads.push(
                 ::thread::spawn(move || {
                     let mut sum: u64 = 0;
-                    for j in (i * i)..500_000 {
+                    for j in i..500_000 {
                         sum += j;
                     }
                     // TODO: automatically check
@@ -160,7 +168,7 @@ pub mod thread_tests {
             res.push(th.join());
         }
 
-        assert_eq!(res, [124999750000, 124999750000, 124999749994, 124999749964, 124999749880, 124999749700,
-                         124999749370, 124999748824, 124999747984, 124999746760])
+        assert_eq!(res, [124999750000, 124999750000, 124999749999, 124999749997, 124999749994, 124999749990,
+                            124999749985, 124999749979, 124999749972, 124999749964])
     }
 }
