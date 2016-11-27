@@ -94,6 +94,8 @@ impl Scheduler {
 
             self.refresh_timer();
             unsafe { self.switch_threads(prev, next) };
+        } else {
+            unsafe { ::interrupts::unlock_on_cpu() };
         }
     }
 
